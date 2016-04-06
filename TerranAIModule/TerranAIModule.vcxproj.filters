@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Source\BuildingPlacer.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Dll.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ResourceLogic.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\TerranAIModule.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\UnitBehavior.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\BuildingPlacer.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RectangleArray.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ResourceLogic.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Shared.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\TerranAIModule.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\UnitBehavior.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header">
+      <UniqueIdentifier>{ec0020b6-2224-4857-a2af-a52b7f46bd1f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{7c2062e7-7fcf-462f-9f81-852301ae0b58}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

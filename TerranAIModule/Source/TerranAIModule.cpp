@@ -1,4 +1,5 @@
 #include "TerranAIModule.h"
+#include "UnitBehavior.h"
 #include <iostream>
 
 using namespace BWAPI;
@@ -6,8 +7,6 @@ using namespace Filter;
 
 void TerranAIModule::onStart()
 {
-	// Hello World!
-	Broodwar->sendText("Hello world!");
 
 	// Print the map name.
 	// BWAPI returns std::string when retrieving a string, don't forget to add .c_str() when printing!
@@ -65,24 +64,60 @@ void TerranAIModule::onFrame()
 {
 	// Called once every game frame
 
+	if (Broodwar->self()->getRace().getName() != "Terran")
+		return; //we don't know how to handle any race other than terran
+
 	// Display the game frame rate as text in the upper left area of the screen
-	Broodwar->drawTextScreen(200, 0, "FPS: %d", Broodwar->getFPS());
-	Broodwar->drawTextScreen(200, 20, "Average FPS: %f", Broodwar->getAverageFPS());
+	Broodwar->drawTextScreen(300, 0, "FPS: %d", Broodwar->getFPS());
+	Broodwar->drawTextScreen(300, 20, "Average FPS: %f", Broodwar->getAverageFPS());
 
 	// Return if the game is a replay or is paused
 	if (Broodwar->isReplay() || Broodwar->isPaused() || !Broodwar->self())
 		return;
 
-	// Prevent spamming by only running our onFrame once every number of latency frames.
-	// Latency frames are the number of frames before commands are processed.
+	/* Prevent spamming by only running onFrame once every number of latency frames.
+	Latency frames are the number of frames before commands are processed. This has
+	the added benefit of not accidentally issuing unnecessary orders as a result of
+	re-evaluating logic before the result of the previous orders has been processed. */
 	if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0)
 		return;
 
-	// Iterate through all the units that we own
+	int enqueuedSupplyDepots = 0;
+	int requiredSupplyDepots = 0;
+	int workerCount = 0;
+
+	// iterate through all the units that we own for the sake of gathering data about them
+	for (auto &u : Broodwar->self()->getUnits()) {
+		// ignore the unit if it no longer exists
+		if (!u->exists())
+			continue;
+
+		//count the number of supply depots enqueued or under construction
+		//if the unit is a worker 
+		if (u->getType().isWorker()) {
+			workerCount++; //(increment worker count while we're at it)
+			//and its current order is to construct a supply depot
+			if (u->getBuildType().supplyProvided() > 0) {
+				//plus one
+				enqueuedSupplyDepots++;
+			}
+		}
+	}
+
+	requiredSupplyDepots = getRequiredSupplyDepots(enqueuedSupplyDepots);
+
+	//draw the information we gathered to the screen until the next time it is evaluated
+	Broodwar->registerEvent([enqueuedSupplyDepots, requiredSupplyDepots](Game*) {
+		Broodwar->drawTextScreen(100, 0, "Supply depots required: %d", requiredSupplyDepots);
+		Broodwar->drawTextScreen(100, 20, "Supply depots enqueued: %d", enqueuedSupplyDepots);
+	},
+		nullptr,    // condition
+		Broodwar->getLatencyFrames());  // frames to run
+
+	// iterate through all the units that we own for the sake of issuing orders to them
 	for (auto &u : Broodwar->self()->getUnits())
 	{
-		// Ignore the unit if it no longer exists
-		// Make sure to include this block when handling any Unit pointer!
+		// ignore the unit if it no longer exists
 		if (!u->exists())
 			continue;
 
@@ -90,7 +125,7 @@ void TerranAIModule::onFrame()
 		if (u->isLockedDown() || u->isMaelstrommed() || u->isStasised())
 			continue;
 
-		// Ignore the unit if it is in one of the following states
+		// Ignore the unit if it is unable to act due to being in one of the following states
 		if (u->isLoaded() || !u->isPowered() || u->isStuck())
 			continue;
 
@@ -98,125 +133,32 @@ void TerranAIModule::onFrame()
 		if (!u->isCompleted() || u->isConstructing())
 			continue;
 
-
-		// Finally make the unit do some stuff!
-
-
-		// If the unit is a worker unit
+		//if the unit is a worker
 		if (u->getType().isWorker())
 		{
-			// if our worker is idle
-			if (u->isIdle())
-			{
-				// Order workers carrying a resource to return them to the center,
-				// otherwise find a mineral patch to harvest.
-				if (u->isCarryingGas() || u->isCarryingMinerals())
-				{
-					u->returnCargo();
-				}
-				else if (!u->getPowerUp())  // The worker cannot harvest anything if it
-				{                             // is carrying a powerup such as a flag
-					// Harvest from the nearest mineral patch
-					if (!u->gather(u->getClosestUnit(IsMineralField)))
-					{
-						// If the call fails, then print the last error message
-						Broodwar << Broodwar->getLastError() << std::endl;
-					}
-
-				} // closure: has no powerup
-			} // closure: if idle
-
+			evaluateWorkerLogicFor(u, requiredSupplyDepots);
 		}
 
-		else if (u->getType().isResourceDepot()) // A resource depot is a Command Center, Nexus, or Hatchery
-		{
-
-			// Order the depot to construct more workers! But only when it is idle.
-			if (u->isIdle() && !u->train(u->getType().getRace().getWorker()))
-			{
-				// If that fails, draw the error at the location so that you can visibly see what went wrong!
-				// However, drawing the error once will only appear for a single frame
-				// so create an event that keeps it on the screen for some frames
-				Position pos = u->getPosition();
-				Error lastErr = Broodwar->getLastError();
-				Broodwar->registerEvent([pos, lastErr](Game*){ Broodwar->drawTextMap(pos, "%c%s", Text::White, lastErr.c_str()); },   // action
-					nullptr,    // condition
-					Broodwar->getLatencyFrames());  // frames to run
-
-				// Retrieve the supply provider type in the case that we have run out of supplies
-				UnitType supplyProviderType = u->getType().getRace().getSupplyProvider();
-				static int lastChecked = 0;
-
-				// If we are supply blocked and haven't tried constructing more recently
-				if (lastErr == Errors::Insufficient_Supply &&
-					lastChecked + 400 < Broodwar->getFrameCount() &&
-					Broodwar->self()->incompleteUnitCount(supplyProviderType) == 0)
-				{
-					lastChecked = Broodwar->getFrameCount();
-
-					// Retrieve a unit that is capable of constructing the supply needed
-					Unit supplyBuilder = u->getClosestUnit(GetType == supplyProviderType.whatBuilds().first &&
-						(IsIdle || IsGatheringMinerals) &&
-						IsOwned);
-					// If a unit was found
-					if (supplyBuilder)
-					{
-						if (supplyProviderType.isBuilding())
-						{
-							TilePosition targetBuildLocation = Broodwar->getBuildLocation(supplyProviderType, supplyBuilder->getTilePosition());
-							if (targetBuildLocation)
-							{
-								// Register an event that draws the target build location
-								Broodwar->registerEvent([targetBuildLocation, supplyProviderType](Game*)
-								{
-									Broodwar->drawBoxMap(Position(targetBuildLocation),
-										Position(targetBuildLocation + supplyProviderType.tileSize()),
-										Colors::Blue);
-								},
-									nullptr,  // condition
-									supplyProviderType.buildTime() + 100);  // frames to run
-
-								// Order the builder to construct the supply structure
-								supplyBuilder->build(supplyProviderType, targetBuildLocation);
-							}
-						}
-						else
-						{
-							// Train the supply provider (Overlord) if the provider is not a structure
-							supplyBuilder->train(supplyProviderType);
-						}
-					} // closure: supplyBuilder is valid
-				} // closure: insufficient supply
-			} // closure: failed to train idle unit
-
+		//if the unit is a townhall
+		if (u->getType().isResourceDepot()) {
+			evaluateTownhallLogicFor(u, workerCount);
 		}
 
-	} // closure: unit iterator
+	}
 }
 
 void TerranAIModule::onSendText(std::string text)
 {
-
-	// Send the text to the game if it is not being processed.
+	//Send the text as is
 	Broodwar->sendText("%s", text.c_str());
-
-
-	// Make sure to use %s and pass the text as a parameter,
-	// otherwise you may run into problems when you use the %(percent) character!
-
 }
 
 void TerranAIModule::onReceiveText(BWAPI::Player player, std::string text)
 {
-	// Parse the received text
-	Broodwar << player->getName() << " said \"" << text << "\"" << std::endl;
 }
 
 void TerranAIModule::onPlayerLeft(BWAPI::Player player)
 {
-	// Interact verbally with the other players in the game by
-	// announcing that the other player has left.
-	Broodwar->sendText("Goodbye %s!", player->getName().c_str());
 }
 
 void TerranAIModule::onNukeDetect(BWAPI::Position target)
@@ -230,25 +172,27 @@ void TerranAIModule::onNukeDetect(BWAPI::Position target)
 	}
 	else
 	{
-		// Otherwise, ask other players where the nuke is!
-		Broodwar->sendText("Where's the nuke?");
 	}
 
 	// You can also retrieve all the nuclear missile targets using Broodwar->getNukeDots()!
 }
 
+//Called when the Unit interface object representing the unit that has just become accessible.
 void TerranAIModule::onUnitDiscover(BWAPI::Unit unit)
 {
 }
 
+//Called when the Unit interface object representing the unit that has just become inaccessible.
 void TerranAIModule::onUnitEvade(BWAPI::Unit unit)
 {
 }
 
+//Called when a previously invisible unit becomes visible.
 void TerranAIModule::onUnitShow(BWAPI::Unit unit)
 {
 }
 
+//Called just as a visible unit is becoming invisible.
 void TerranAIModule::onUnitHide(BWAPI::Unit unit)
 {
 }
@@ -287,6 +231,7 @@ void TerranAIModule::onUnitMorph(BWAPI::Unit unit)
 	}
 }
 
+// Called when a unit changes ownership. In a normal game, occurs only as a result of the Protoss Dark Archon's ability "Mind Control."
 void TerranAIModule::onUnitRenegade(BWAPI::Unit unit)
 {
 }

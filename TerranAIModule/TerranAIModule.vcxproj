@@ -91,11 +91,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\BuildingPlacer.cpp" />
     <ClCompile Include="Source\Dll.cpp" />
+    <ClCompile Include="Source\ResourceLogic.cpp" />
     <ClCompile Include="Source\TerranAIModule.cpp" />
+    <ClCompile Include="Source\UnitBehavior.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\BuildingPlacer.h" />
+    <ClInclude Include="Source\RectangleArray.h" />
+    <ClInclude Include="Source\ResourceLogic.h" />
+    <ClInclude Include="Source\Shared.h" />
     <ClInclude Include="Source\TerranAIModule.h" />
+    <ClInclude Include="Source\UnitBehavior.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

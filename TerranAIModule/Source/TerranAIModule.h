@@ -1,12 +1,11 @@
 #pragma once
-#include <BWAPI.h>
+#include "Shared.h"
 
 // Remember not to use "Broodwar" in any global class constructor!
 
 class TerranAIModule : public BWAPI::AIModule
 {
 public:
-  // Virtual functions for callbacks, leave these as they are.
   virtual void onStart();
   virtual void onEnd(bool isWinner);
   virtual void onFrame();
@@ -24,6 +23,5 @@ public:
   virtual void onUnitRenegade(BWAPI::Unit unit);
   virtual void onSaveGame(std::string gameName);
   virtual void onUnitComplete(BWAPI::Unit unit);
-  // Everything below this line is safe to modify.
 
 };

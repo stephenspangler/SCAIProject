@@ -1,177 +1,203 @@
-4/6/2016 4:38:17 PM 2608 Logging started
-4/6/2016 4:38:17 PM 2608 Begin Startup
-4/6/2016 4:38:17 PM 2608 Chaosauncher 0.5.4.4 on NT 6.1.7601 Service Pack 1 at C:\gitrep\SCAIProject\Chaoslauncher\Chaoslauncher.exe
-4/6/2016 4:38:17 PM 2608 Load Settings
-4/6/2016 4:38:17 PM 2608 GamePath: C:\Program Files (x86)\StarCraft\
-4/6/2016 4:38:17 PM 2608 Load Plugins
-4/6/2016 4:38:17 PM 2608 AdvLoaderPluginPath: C:\Program Files (x86)\mca64Launcher\mca64Launcher 2.0.0.118\\Plugins\
-4/6/2016 4:38:17 PM 2608 Loading BWL4-Plugin C:\gitrep\SCAIProject\Chaoslauncher\iccscbn.icc
-4/6/2016 4:38:17 PM 2608 Plugin loaded ICCup
-4/6/2016 4:38:17 PM 2608 Loading BWL4-Plugin C:\gitrep\SCAIProject\Chaoslauncher\Plugins\APMAlert.bwl
-4/6/2016 4:38:17 PM 2608 Plugin loaded APMAlert (1.16.1)
-4/6/2016 4:38:17 PM 2608 Loading BWL4-Plugin C:\gitrep\SCAIProject\Chaoslauncher\Plugins\BWAPI_PluginInjector.bwl
-4/6/2016 4:38:17 PM 2608 Plugin loaded BWAPI 4.1.2 Injector [RELEASE]
-4/6/2016 4:38:17 PM 2608 Loading BWL4-Plugin C:\gitrep\SCAIProject\Chaoslauncher\Plugins\BWAPI_PluginInjectord.bwl
-4/6/2016 4:38:17 PM 2608 Plugin loaded BWAPI 4.1.2 Injector [DEBUG]
-4/6/2016 4:38:17 PM 2608 Loading BWL4-Plugin C:\gitrep\SCAIProject\Chaoslauncher\Plugins\Chaosplugin.bwl
-4/6/2016 4:38:17 PM 2608 Plugin loaded Chaosplugin for 1.16.1
-4/6/2016 4:38:17 PM 2608 Loading BWL4-Plugin C:\gitrep\SCAIProject\Chaoslauncher\Plugins\LatencyChanger.bwl
-4/6/2016 4:38:17 PM 2608 Plugin loaded LatencyChanger for 1.16.1
-4/6/2016 4:38:17 PM 2608 Loading BWL4-Plugin C:\gitrep\SCAIProject\Chaoslauncher\Plugins\repfix.bwl
-4/6/2016 4:38:17 PM 2608 Plugin loaded RepFix
-4/6/2016 4:38:17 PM 2608 Loading BWL4-Plugin C:\gitrep\SCAIProject\Chaoslauncher\Plugins\RWAPlayer.bwl
-4/6/2016 4:38:17 PM 2608 Plugin loaded RWAPlayer (1.16.1)
-4/6/2016 4:38:17 PM 2608 Loading BWL4-Plugin C:\gitrep\SCAIProject\Chaoslauncher\Plugins\RWARecorder.bwl
-4/6/2016 4:38:17 PM 2608 Plugin loaded RWARecorder (1.16.1)
-4/6/2016 4:38:17 PM 2608 Loading BWL4-Plugin C:\gitrep\SCAIProject\Chaoslauncher\Plugins\Stormplugin.bwl
-4/6/2016 4:38:17 PM 2608 Plugin loaded Stormplugin for 1.16.1
-4/6/2016 4:38:17 PM 2608 Loading BWL4-Plugin C:\gitrep\SCAIProject\Chaoslauncher\Plugins\wmode.bwl
-4/6/2016 4:38:17 PM 2608 Plugin loaded W-MODE 1.02
-4/6/2016 4:38:17 PM 2608 Plugin loaded AdvBNet
-4/6/2016 4:38:17 PM 2608 Plugin loaded APMLive
-4/6/2016 4:38:17 PM 2608 Plugin loaded HotkeySelector
-4/6/2016 4:38:17 PM 2608 Plugin loaded ObsMode
-4/6/2016 4:38:17 PM 2608 Plugin loaded StatInfo
-4/6/2016 4:38:17 PM 2608 Load Tools
-4/6/2016 4:38:17 PM 2608 Init GUI
-4/6/2016 4:38:17 PM 2608 Get Starcraftversions
-4/6/2016 4:38:17 PM 2608 Init complete
-4/6/2016 4:38:19 PM 2608 Startbutton
-4/6/2016 4:38:19 PM 2608 Starting Game Starcraft 1.16.1 C:\Program Files (x86)\StarCraft\StarCraft.exe
-4/6/2016 4:38:19 PM 2608 BWAPI 4.1.2 Injector [DEBUG] Version  Compatible
-4/6/2016 4:38:19 PM 2608 W-MODE 1.02 Version 1.0.2 Compatible
-4/6/2016 4:38:19 PM 2608 Obtained DebugPrivilege
-4/6/2016 4:38:19 PM 2608 CreateProcess
-4/6/2016 4:38:19 PM 2608 Call ScSuspended for all active Plugins
-4/6/2016 4:38:19 PM 2608 ApplyPatchSuspended for BWAPI 4.1.2 Injector [DEBUG]
-4/6/2016 4:38:40 PM 2608 ApplyPatchSuspended for W-MODE 1.02
-4/6/2016 4:38:40 PM 2608 ResumeThread
-4/6/2016 4:38:40 PM 2608 WaitForInputIdle
-4/6/2016 4:38:40 PM 2608 Call ScWindowCreated for all active Plugins
-4/6/2016 4:38:40 PM 2608 ApplyPatch for BWAPI 4.1.2 Injector [DEBUG]
-4/6/2016 4:38:40 PM 2608 ApplyPatch for W-MODE 1.02
-4/6/2016 4:38:40 PM 2608 Starting Starcraft completed
-4/6/2016 4:57:43 PM 2608 Startbutton
-4/6/2016 4:57:43 PM 2608 Starting Game Starcraft 1.16.1 C:\Program Files (x86)\StarCraft\StarCraft.exe
-4/6/2016 4:57:43 PM 2608 BWAPI 4.1.2 Injector [DEBUG] Version  Compatible
-4/6/2016 4:57:43 PM 2608 W-MODE 1.02 Version 1.0.2 Compatible
-4/6/2016 4:57:43 PM 2608 Obtained DebugPrivilege
-4/6/2016 4:57:43 PM 2608 CreateProcess
-4/6/2016 4:57:43 PM 2608 Call ScSuspended for all active Plugins
-4/6/2016 4:57:43 PM 2608 ApplyPatchSuspended for BWAPI 4.1.2 Injector [DEBUG]
-4/6/2016 4:58:06 PM 2608 ApplyPatchSuspended for W-MODE 1.02
-4/6/2016 4:58:06 PM 2608 ResumeThread
-4/6/2016 4:58:06 PM 2608 WaitForInputIdle
-4/6/2016 4:58:06 PM 2608 Call ScWindowCreated for all active Plugins
-4/6/2016 4:58:06 PM 2608 ApplyPatch for BWAPI 4.1.2 Injector [DEBUG]
-4/6/2016 4:58:06 PM 2608 ApplyPatch for W-MODE 1.02
-4/6/2016 4:58:06 PM 2608 Starting Starcraft completed
-4/6/2016 5:00:36 PM 2608 Check for updates
-4/6/2016 5:00:36 PM 2608 Update ICCup Antihack
-4/6/2016 5:00:36 PM 2608 Exception at: TIccPlugin.CheckForUpdates http.get(Update.info) class: EIdHTTPProtocolException msg: HTTP/1.1 301 Moved Permanently
-4/6/2016 5:00:36 PM 2608 Updateing APMAlert (1.16.1)
-4/6/2016 5:00:36 PM 2608 url: http://rockify.net/APMAlert/
-4/6/2016 5:00:36 PM 2608 Updateing BWAPI 4.1.2 Injector [RELEASE]
-4/6/2016 5:00:36 PM 2608 Updateing BWAPI 4.1.2 Injector [DEBUG]
-4/6/2016 5:00:36 PM 2608 Updateing Chaosplugin for 1.16.1
-4/6/2016 5:00:36 PM 2608 url: http://winner.cspsx.de/Starcraft/Tool/Update/
-4/6/2016 5:00:37 PM 2608 Updateing LatencyChanger for 1.16.1
-4/6/2016 5:00:37 PM 2608 url: http://winner.cspsx.de/Starcraft/Tool/LatencyUpdate/
-4/6/2016 5:00:37 PM 2608 Updateing RepFix
-4/6/2016 5:00:37 PM 2608 url: http://www.iccup.com/
-4/6/2016 5:00:38 PM 2608 Exception at: BwlUpdateCheck http.get(update) class: EIdHTTPProtocolException msg: HTTP/1.1 301 Moved Permanently
-4/6/2016 5:00:38 PM 2608 Updateing RWAPlayer (1.16.1)
-4/6/2016 5:00:38 PM 2608 url: http://rockify.net/RWA/Player/
-4/6/2016 5:00:38 PM 2608 Updateing RWARecorder (1.16.1)
-4/6/2016 5:00:38 PM 2608 url: http://rockify.net/RWA/Recorder/
-4/6/2016 5:00:38 PM 2608 Updateing Stormplugin for 1.16.1
-4/6/2016 5:00:38 PM 2608 url: http://winner.cspsx.de/Starcraft/Tool/StormUpdate/
-4/6/2016 5:00:38 PM 2608 Updateing W-MODE 1.02
-4/6/2016 5:00:38 PM 2608 Updateing Launcher
-4/6/2016 5:00:38 PM 2608 url: http://winner.cspsx.de/Starcraft/Tool/Launcherupdate/
-4/6/2016 5:00:38 PM 2608 No updates available
-4/6/2016 5:00:54 PM 2608 Startbutton
-4/6/2016 5:00:54 PM 2608 Starting Game Starcraft 1.16.1 C:\Program Files (x86)\StarCraft\StarCraft.exe
-4/6/2016 5:00:54 PM 2608 BWAPI 4.1.2 Injector [DEBUG] Version  Compatible
-4/6/2016 5:00:54 PM 2608 Obtained DebugPrivilege
-4/6/2016 5:00:54 PM 2608 CreateProcess
-4/6/2016 5:00:54 PM 2608 Call ScSuspended for all active Plugins
-4/6/2016 5:00:54 PM 2608 ApplyPatchSuspended for BWAPI 4.1.2 Injector [DEBUG]
-4/6/2016 5:01:14 PM 2608 ResumeThread
-4/6/2016 5:01:14 PM 2608 WaitForInputIdle
-4/6/2016 5:01:15 PM 2608 Call ScWindowCreated for all active Plugins
-4/6/2016 5:01:15 PM 2608 ApplyPatch for BWAPI 4.1.2 Injector [DEBUG]
-4/6/2016 5:01:15 PM 2608 Starting Starcraft completed
-4/6/2016 5:02:44 PM 2608 Startbutton
-4/6/2016 5:02:44 PM 2608 Starting Game Starcraft 1.16.1 C:\Program Files (x86)\StarCraft\StarCraft.exe
-4/6/2016 5:02:44 PM 2608 BWAPI 4.1.2 Injector [DEBUG] Version  Compatible
-4/6/2016 5:02:45 PM 2608 W-MODE 1.02 Version 1.0.2 Compatible
-4/6/2016 5:02:45 PM 2608 Obtained DebugPrivilege
-4/6/2016 5:02:45 PM 2608 CreateProcess
-4/6/2016 5:02:45 PM 2608 Call ScSuspended for all active Plugins
-4/6/2016 5:02:45 PM 2608 ApplyPatchSuspended for BWAPI 4.1.2 Injector [DEBUG]
-4/6/2016 5:03:05 PM 2608 ApplyPatchSuspended for W-MODE 1.02
-4/6/2016 5:03:05 PM 2608 ResumeThread
-4/6/2016 5:03:05 PM 2608 WaitForInputIdle
-4/6/2016 5:03:05 PM 2608 Call ScWindowCreated for all active Plugins
-4/6/2016 5:03:05 PM 2608 ApplyPatch for BWAPI 4.1.2 Injector [DEBUG]
-4/6/2016 5:03:05 PM 2608 ApplyPatch for W-MODE 1.02
-4/6/2016 5:03:05 PM 2608 Starting Starcraft completed
-4/6/2016 5:06:25 PM 2608 Startbutton
-4/6/2016 5:06:25 PM 2608 Starting Game Starcraft 1.16.1 C:\Program Files (x86)\StarCraft\StarCraft.exe
-4/6/2016 5:06:25 PM 2608 BWAPI 4.1.2 Injector [DEBUG] Version  Compatible
-4/6/2016 5:06:25 PM 2608 W-MODE 1.02 Version 1.0.2 Compatible
-4/6/2016 5:06:25 PM 2608 Obtained DebugPrivilege
-4/6/2016 5:06:25 PM 2608 CreateProcess
-4/6/2016 5:06:25 PM 2608 Call ScSuspended for all active Plugins
-4/6/2016 5:06:25 PM 2608 ApplyPatchSuspended for BWAPI 4.1.2 Injector [DEBUG]
-4/6/2016 5:06:46 PM 2608 ApplyPatchSuspended for W-MODE 1.02
-4/6/2016 5:06:46 PM 2608 ResumeThread
-4/6/2016 5:06:46 PM 2608 WaitForInputIdle
-4/6/2016 5:06:46 PM 2608 Call ScWindowCreated for all active Plugins
-4/6/2016 5:06:46 PM 2608 ApplyPatch for BWAPI 4.1.2 Injector [DEBUG]
-4/6/2016 5:06:46 PM 2608 ApplyPatch for W-MODE 1.02
-4/6/2016 5:06:46 PM 2608 Starting Starcraft completed
-4/6/2016 5:51:11 PM 2608 Startbutton
-4/6/2016 5:51:11 PM 2608 Starting Game Starcraft 1.16.1 C:\Program Files (x86)\StarCraft\StarCraft.exe
-4/6/2016 5:51:11 PM 2608 BWAPI 4.1.2 Injector [DEBUG] Version  Compatible
-4/6/2016 5:51:11 PM 2608 W-MODE 1.02 Version 1.0.2 Compatible
-4/6/2016 5:51:11 PM 2608 Obtained DebugPrivilege
-4/6/2016 5:51:11 PM 2608 CreateProcess
-4/6/2016 5:51:11 PM 2608 Call ScSuspended for all active Plugins
-4/6/2016 5:51:11 PM 2608 ApplyPatchSuspended for BWAPI 4.1.2 Injector [DEBUG]
-4/6/2016 5:51:33 PM 2608 ApplyPatchSuspended for W-MODE 1.02
-4/6/2016 5:51:33 PM 2608 ResumeThread
-4/6/2016 5:51:33 PM 2608 WaitForInputIdle
-4/6/2016 5:51:33 PM 2608 Call ScWindowCreated for all active Plugins
-4/6/2016 5:51:33 PM 2608 ApplyPatch for BWAPI 4.1.2 Injector [DEBUG]
-4/6/2016 5:51:33 PM 2608 ApplyPatch for W-MODE 1.02
-4/6/2016 5:51:33 PM 2608 Starting Starcraft completed
-4/6/2016 6:07:38 PM 2608 Startbutton
-4/6/2016 6:07:38 PM 2608 Starting Game Starcraft 1.16.1 C:\Program Files (x86)\StarCraft\StarCraft.exe
-4/6/2016 6:07:38 PM 2608 BWAPI 4.1.2 Injector [DEBUG] Version  Compatible
-4/6/2016 6:07:38 PM 2608 W-MODE 1.02 Version 1.0.2 Compatible
-4/6/2016 6:07:38 PM 2608 Obtained DebugPrivilege
-4/6/2016 6:07:38 PM 2608 CreateProcess
-4/6/2016 6:07:38 PM 2608 Call ScSuspended for all active Plugins
-4/6/2016 6:07:38 PM 2608 ApplyPatchSuspended for BWAPI 4.1.2 Injector [DEBUG]
-4/6/2016 6:07:59 PM 2608 ApplyPatchSuspended for W-MODE 1.02
-4/6/2016 6:07:59 PM 2608 ResumeThread
-4/6/2016 6:07:59 PM 2608 WaitForInputIdle
-4/6/2016 6:07:59 PM 2608 Call ScWindowCreated for all active Plugins
-4/6/2016 6:07:59 PM 2608 ApplyPatch for BWAPI 4.1.2 Injector [DEBUG]
-4/6/2016 6:07:59 PM 2608 ApplyPatch for W-MODE 1.02
-4/6/2016 6:07:59 PM 2608 Starting Starcraft completed
-4/6/2016 7:45:52 PM 2608 Finishing
-4/6/2016 7:45:52 PM 2608 Unloading Plugin ICCup
-4/6/2016 7:45:52 PM 2608 Unloading Plugin APMAlert (1.16.1)
-4/6/2016 7:45:52 PM 2608 Unloading Plugin BWAPI 4.1.2 Injector [RELEASE]
-4/6/2016 7:45:52 PM 2608 Unloading Plugin BWAPI 4.1.2 Injector [DEBUG]
-4/6/2016 7:45:52 PM 2608 Unloading Plugin Chaosplugin for 1.16.1
-4/6/2016 7:45:52 PM 2608 Unloading Plugin LatencyChanger for 1.16.1
-4/6/2016 7:45:52 PM 2608 Unloading Plugin RepFix
-4/6/2016 7:45:52 PM 2608 Unloading Plugin RWAPlayer (1.16.1)
-4/6/2016 7:45:52 PM 2608 Unloading Plugin RWARecorder (1.16.1)
-4/6/2016 7:45:52 PM 2608 Unloading Plugin Stormplugin for 1.16.1
-4/6/2016 7:45:52 PM 2608 Unloading Plugin W-MODE 1.02
-4/6/2016 7:45:52 PM 2608 Logging ended
+4/7/2016 12:41:32 AM 1948 Logging started
+4/7/2016 12:41:32 AM 1948 Begin Startup
+4/7/2016 12:41:32 AM 1948 Chaosauncher 0.5.4.4 on NT 6.1.7601 Service Pack 1 at C:\gitrep\SCAIProject\Chaoslauncher\Chaoslauncher.exe
+4/7/2016 12:41:32 AM 1948 Load Settings
+4/7/2016 12:41:32 AM 1948 GamePath: C:\Program Files (x86)\StarCraft\
+4/7/2016 12:41:32 AM 1948 Load Plugins
+4/7/2016 12:41:32 AM 1948 AdvLoaderPluginPath: C:\Program Files (x86)\mca64Launcher\mca64Launcher 2.0.0.118\\Plugins\
+4/7/2016 12:41:32 AM 1948 Loading BWL4-Plugin C:\gitrep\SCAIProject\Chaoslauncher\iccscbn.icc
+4/7/2016 12:41:32 AM 1948 Plugin loaded ICCup
+4/7/2016 12:41:32 AM 1948 Loading BWL4-Plugin C:\gitrep\SCAIProject\Chaoslauncher\Plugins\APMAlert.bwl
+4/7/2016 12:41:32 AM 1948 Plugin loaded APMAlert (1.16.1)
+4/7/2016 12:41:32 AM 1948 Loading BWL4-Plugin C:\gitrep\SCAIProject\Chaoslauncher\Plugins\BWAPI_PluginInjector.bwl
+4/7/2016 12:41:32 AM 1948 Plugin loaded BWAPI 4.1.2 Injector [RELEASE]
+4/7/2016 12:41:32 AM 1948 Loading BWL4-Plugin C:\gitrep\SCAIProject\Chaoslauncher\Plugins\BWAPI_PluginInjectord.bwl
+4/7/2016 12:41:32 AM 1948 Plugin loaded BWAPI 4.1.2 Injector [DEBUG]
+4/7/2016 12:41:32 AM 1948 Loading BWL4-Plugin C:\gitrep\SCAIProject\Chaoslauncher\Plugins\Chaosplugin.bwl
+4/7/2016 12:41:32 AM 1948 Plugin loaded Chaosplugin for 1.16.1
+4/7/2016 12:41:32 AM 1948 Loading BWL4-Plugin C:\gitrep\SCAIProject\Chaoslauncher\Plugins\LatencyChanger.bwl
+4/7/2016 12:41:32 AM 1948 Plugin loaded LatencyChanger for 1.16.1
+4/7/2016 12:41:32 AM 1948 Loading BWL4-Plugin C:\gitrep\SCAIProject\Chaoslauncher\Plugins\repfix.bwl
+4/7/2016 12:41:32 AM 1948 Plugin loaded RepFix
+4/7/2016 12:41:32 AM 1948 Loading BWL4-Plugin C:\gitrep\SCAIProject\Chaoslauncher\Plugins\RWAPlayer.bwl
+4/7/2016 12:41:32 AM 1948 Plugin loaded RWAPlayer (1.16.1)
+4/7/2016 12:41:32 AM 1948 Loading BWL4-Plugin C:\gitrep\SCAIProject\Chaoslauncher\Plugins\RWARecorder.bwl
+4/7/2016 12:41:32 AM 1948 Plugin loaded RWARecorder (1.16.1)
+4/7/2016 12:41:32 AM 1948 Loading BWL4-Plugin C:\gitrep\SCAIProject\Chaoslauncher\Plugins\Stormplugin.bwl
+4/7/2016 12:41:32 AM 1948 Plugin loaded Stormplugin for 1.16.1
+4/7/2016 12:41:32 AM 1948 Loading BWL4-Plugin C:\gitrep\SCAIProject\Chaoslauncher\Plugins\wmode.bwl
+4/7/2016 12:41:32 AM 1948 Plugin loaded W-MODE 1.02
+4/7/2016 12:41:32 AM 1948 Plugin loaded AdvBNet
+4/7/2016 12:41:32 AM 1948 Plugin loaded APMLive
+4/7/2016 12:41:32 AM 1948 Plugin loaded HotkeySelector
+4/7/2016 12:41:32 AM 1948 Plugin loaded ObsMode
+4/7/2016 12:41:32 AM 1948 Plugin loaded StatInfo
+4/7/2016 12:41:32 AM 1948 Load Tools
+4/7/2016 12:41:32 AM 1948 Init GUI
+4/7/2016 12:41:32 AM 1948 Get Starcraftversions
+4/7/2016 12:41:32 AM 1948 Init complete
+4/7/2016 12:41:34 AM 1948 Startbutton
+4/7/2016 12:41:34 AM 1948 Starting Game Starcraft 1.16.1 C:\Program Files (x86)\StarCraft\StarCraft.exe
+4/7/2016 12:41:34 AM 1948 BWAPI 4.1.2 Injector [DEBUG] Version  Compatible
+4/7/2016 12:41:34 AM 1948 W-MODE 1.02 Version 1.0.2 Compatible
+4/7/2016 12:41:34 AM 1948 Obtained DebugPrivilege
+4/7/2016 12:41:34 AM 1948 CreateProcess
+4/7/2016 12:41:34 AM 1948 Call ScSuspended for all active Plugins
+4/7/2016 12:41:34 AM 1948 ApplyPatchSuspended for BWAPI 4.1.2 Injector [DEBUG]
+4/7/2016 12:41:55 AM 1948 ApplyPatchSuspended for W-MODE 1.02
+4/7/2016 12:41:55 AM 1948 ResumeThread
+4/7/2016 12:41:55 AM 1948 WaitForInputIdle
+4/7/2016 12:41:55 AM 1948 Call ScWindowCreated for all active Plugins
+4/7/2016 12:41:55 AM 1948 ApplyPatch for BWAPI 4.1.2 Injector [DEBUG]
+4/7/2016 12:41:55 AM 1948 ApplyPatch for W-MODE 1.02
+4/7/2016 12:41:55 AM 1948 Starting Starcraft completed
+4/7/2016 12:48:35 AM 1948 Startbutton
+4/7/2016 12:48:35 AM 1948 Starting Game Starcraft 1.16.1 C:\Program Files (x86)\StarCraft\StarCraft.exe
+4/7/2016 12:48:35 AM 1948 BWAPI 4.1.2 Injector [DEBUG] Version  Compatible
+4/7/2016 12:48:35 AM 1948 W-MODE 1.02 Version 1.0.2 Compatible
+4/7/2016 12:48:35 AM 1948 Obtained DebugPrivilege
+4/7/2016 12:48:35 AM 1948 CreateProcess
+4/7/2016 12:48:35 AM 1948 Call ScSuspended for all active Plugins
+4/7/2016 12:48:35 AM 1948 ApplyPatchSuspended for BWAPI 4.1.2 Injector [DEBUG]
+4/7/2016 12:48:45 AM 1948 ApplyPatchSuspended for W-MODE 1.02
+4/7/2016 12:48:45 AM 1948 ResumeThread
+4/7/2016 12:48:45 AM 1948 WaitForInputIdle
+4/7/2016 12:48:45 AM 1948 Call ScWindowCreated for all active Plugins
+4/7/2016 12:48:45 AM 1948 ApplyPatch for BWAPI 4.1.2 Injector [DEBUG]
+4/7/2016 12:48:45 AM 1948 ApplyPatch for W-MODE 1.02
+4/7/2016 12:48:45 AM 1948 Starting Starcraft completed
+4/7/2016 12:53:46 AM 1948 Startbutton
+4/7/2016 12:53:46 AM 1948 Starting Game Starcraft 1.16.1 C:\Program Files (x86)\StarCraft\StarCraft.exe
+4/7/2016 12:53:46 AM 1948 BWAPI 4.1.2 Injector [DEBUG] Version  Compatible
+4/7/2016 12:53:46 AM 1948 W-MODE 1.02 Version 1.0.2 Compatible
+4/7/2016 12:53:46 AM 1948 Obtained DebugPrivilege
+4/7/2016 12:53:46 AM 1948 CreateProcess
+4/7/2016 12:53:46 AM 1948 Call ScSuspended for all active Plugins
+4/7/2016 12:53:46 AM 1948 ApplyPatchSuspended for BWAPI 4.1.2 Injector [DEBUG]
+4/7/2016 12:54:06 AM 1948 ApplyPatchSuspended for W-MODE 1.02
+4/7/2016 12:54:06 AM 1948 ResumeThread
+4/7/2016 12:54:06 AM 1948 WaitForInputIdle
+4/7/2016 12:54:06 AM 1948 Call ScWindowCreated for all active Plugins
+4/7/2016 12:54:06 AM 1948 ApplyPatch for BWAPI 4.1.2 Injector [DEBUG]
+4/7/2016 12:54:06 AM 1948 ApplyPatch for W-MODE 1.02
+4/7/2016 12:54:06 AM 1948 Starting Starcraft completed
+4/7/2016 12:59:19 AM 1948 Startbutton
+4/7/2016 12:59:19 AM 1948 Starting Game Starcraft 1.16.1 C:\Program Files (x86)\StarCraft\StarCraft.exe
+4/7/2016 12:59:19 AM 1948 BWAPI 4.1.2 Injector [DEBUG] Version  Compatible
+4/7/2016 12:59:19 AM 1948 W-MODE 1.02 Version 1.0.2 Compatible
+4/7/2016 12:59:19 AM 1948 Obtained DebugPrivilege
+4/7/2016 12:59:19 AM 1948 CreateProcess
+4/7/2016 12:59:19 AM 1948 Call ScSuspended for all active Plugins
+4/7/2016 12:59:19 AM 1948 ApplyPatchSuspended for BWAPI 4.1.2 Injector [DEBUG]
+4/7/2016 12:59:39 AM 1948 ApplyPatchSuspended for W-MODE 1.02
+4/7/2016 12:59:39 AM 1948 ResumeThread
+4/7/2016 12:59:39 AM 1948 WaitForInputIdle
+4/7/2016 12:59:39 AM 1948 Call ScWindowCreated for all active Plugins
+4/7/2016 12:59:39 AM 1948 ApplyPatch for BWAPI 4.1.2 Injector [DEBUG]
+4/7/2016 12:59:39 AM 1948 ApplyPatch for W-MODE 1.02
+4/7/2016 12:59:39 AM 1948 Starting Starcraft completed
+4/7/2016 1:00:44 AM 1948 Startbutton
+4/7/2016 1:00:44 AM 1948 Starting Game Starcraft 1.16.1 C:\Program Files (x86)\StarCraft\StarCraft.exe
+4/7/2016 1:00:44 AM 1948 BWAPI 4.1.2 Injector [DEBUG] Version  Compatible
+4/7/2016 1:00:44 AM 1948 W-MODE 1.02 Version 1.0.2 Compatible
+4/7/2016 1:00:44 AM 1948 Obtained DebugPrivilege
+4/7/2016 1:00:44 AM 1948 CreateProcess
+4/7/2016 1:00:44 AM 1948 Call ScSuspended for all active Plugins
+4/7/2016 1:00:44 AM 1948 ApplyPatchSuspended for BWAPI 4.1.2 Injector [DEBUG]
+4/7/2016 1:01:05 AM 1948 ApplyPatchSuspended for W-MODE 1.02
+4/7/2016 1:01:05 AM 1948 ResumeThread
+4/7/2016 1:01:05 AM 1948 WaitForInputIdle
+4/7/2016 1:01:05 AM 1948 Call ScWindowCreated for all active Plugins
+4/7/2016 1:01:05 AM 1948 ApplyPatch for BWAPI 4.1.2 Injector [DEBUG]
+4/7/2016 1:01:05 AM 1948 ApplyPatch for W-MODE 1.02
+4/7/2016 1:01:05 AM 1948 Starting Starcraft completed
+4/7/2016 2:56:56 AM 1948 Startbutton
+4/7/2016 2:56:56 AM 1948 Starting Game Starcraft 1.16.1 C:\Program Files (x86)\StarCraft\StarCraft.exe
+4/7/2016 2:56:56 AM 1948 BWAPI 4.1.2 Injector [DEBUG] Version  Compatible
+4/7/2016 2:56:56 AM 1948 W-MODE 1.02 Version 1.0.2 Compatible
+4/7/2016 2:56:56 AM 1948 Obtained DebugPrivilege
+4/7/2016 2:56:56 AM 1948 CreateProcess
+4/7/2016 2:56:56 AM 1948 Call ScSuspended for all active Plugins
+4/7/2016 2:56:56 AM 1948 ApplyPatchSuspended for BWAPI 4.1.2 Injector [DEBUG]
+4/7/2016 2:57:06 AM 1948 ApplyPatchSuspended for W-MODE 1.02
+4/7/2016 2:57:06 AM 1948 ResumeThread
+4/7/2016 2:57:06 AM 1948 WaitForInputIdle
+4/7/2016 2:57:06 AM 1948 Call ScWindowCreated for all active Plugins
+4/7/2016 2:57:06 AM 1948 ApplyPatch for BWAPI 4.1.2 Injector [DEBUG]
+4/7/2016 2:57:06 AM 1948 ApplyPatch for W-MODE 1.02
+4/7/2016 2:57:06 AM 1948 Starting Starcraft completed
+4/7/2016 3:10:33 AM 1948 Startbutton
+4/7/2016 3:10:33 AM 1948 Starting Game Starcraft 1.16.1 C:\Program Files (x86)\StarCraft\StarCraft.exe
+4/7/2016 3:10:33 AM 1948 BWAPI 4.1.2 Injector [DEBUG] Version  Compatible
+4/7/2016 3:10:33 AM 1948 W-MODE 1.02 Version 1.0.2 Compatible
+4/7/2016 3:10:33 AM 1948 Obtained DebugPrivilege
+4/7/2016 3:10:33 AM 1948 CreateProcess
+4/7/2016 3:10:33 AM 1948 Call ScSuspended for all active Plugins
+4/7/2016 3:10:33 AM 1948 ApplyPatchSuspended for BWAPI 4.1.2 Injector [DEBUG]
+4/7/2016 3:10:54 AM 1948 ApplyPatchSuspended for W-MODE 1.02
+4/7/2016 3:10:54 AM 1948 ResumeThread
+4/7/2016 3:10:54 AM 1948 WaitForInputIdle
+4/7/2016 3:10:54 AM 1948 Call ScWindowCreated for all active Plugins
+4/7/2016 3:10:54 AM 1948 ApplyPatch for BWAPI 4.1.2 Injector [DEBUG]
+4/7/2016 3:10:54 AM 1948 ApplyPatch for W-MODE 1.02
+4/7/2016 3:10:54 AM 1948 Starting Starcraft completed
+4/7/2016 4:41:19 AM 1948 Startbutton
+4/7/2016 4:41:19 AM 1948 Starting Game Starcraft 1.16.1 C:\Program Files (x86)\StarCraft\StarCraft.exe
+4/7/2016 4:41:19 AM 1948 BWAPI 4.1.2 Injector [DEBUG] Version  Compatible
+4/7/2016 4:41:19 AM 1948 W-MODE 1.02 Version 1.0.2 Compatible
+4/7/2016 4:41:19 AM 1948 Obtained DebugPrivilege
+4/7/2016 4:41:19 AM 1948 CreateProcess
+4/7/2016 4:41:19 AM 1948 Call ScSuspended for all active Plugins
+4/7/2016 4:41:19 AM 1948 ApplyPatchSuspended for BWAPI 4.1.2 Injector [DEBUG]
+4/7/2016 4:41:29 AM 1948 ApplyPatchSuspended for W-MODE 1.02
+4/7/2016 4:41:29 AM 1948 ResumeThread
+4/7/2016 4:41:29 AM 1948 WaitForInputIdle
+4/7/2016 4:41:29 AM 1948 Call ScWindowCreated for all active Plugins
+4/7/2016 4:41:29 AM 1948 ApplyPatch for BWAPI 4.1.2 Injector [DEBUG]
+4/7/2016 4:41:29 AM 1948 ApplyPatch for W-MODE 1.02
+4/7/2016 4:41:29 AM 1948 Starting Starcraft completed
+4/7/2016 4:42:52 AM 1948 Startbutton
+4/7/2016 4:42:52 AM 1948 Starting Game Starcraft 1.16.1 C:\Program Files (x86)\StarCraft\StarCraft.exe
+4/7/2016 4:42:52 AM 1948 BWAPI 4.1.2 Injector [DEBUG] Version  Compatible
+4/7/2016 4:42:52 AM 1948 W-MODE 1.02 Version 1.0.2 Compatible
+4/7/2016 4:42:52 AM 1948 Obtained DebugPrivilege
+4/7/2016 4:42:52 AM 1948 CreateProcess
+4/7/2016 4:42:52 AM 1948 Call ScSuspended for all active Plugins
+4/7/2016 4:42:52 AM 1948 ApplyPatchSuspended for BWAPI 4.1.2 Injector [DEBUG]
+4/7/2016 4:43:13 AM 1948 ApplyPatchSuspended for W-MODE 1.02
+4/7/2016 4:43:13 AM 1948 ResumeThread
+4/7/2016 4:43:13 AM 1948 WaitForInputIdle
+4/7/2016 4:43:13 AM 1948 Call ScWindowCreated for all active Plugins
+4/7/2016 4:43:13 AM 1948 ApplyPatch for BWAPI 4.1.2 Injector [DEBUG]
+4/7/2016 4:43:13 AM 1948 ApplyPatch for W-MODE 1.02
+4/7/2016 4:43:13 AM 1948 Starting Starcraft completed
+4/7/2016 4:48:06 AM 1948 Startbutton
+4/7/2016 4:48:06 AM 1948 Starting Game Starcraft 1.16.1 C:\Program Files (x86)\StarCraft\StarCraft.exe
+4/7/2016 4:48:06 AM 1948 BWAPI 4.1.2 Injector [DEBUG] Version  Compatible
+4/7/2016 4:48:06 AM 1948 W-MODE 1.02 Version 1.0.2 Compatible
+4/7/2016 4:48:06 AM 1948 Obtained DebugPrivilege
+4/7/2016 4:48:06 AM 1948 CreateProcess
+4/7/2016 4:48:06 AM 1948 Call ScSuspended for all active Plugins
+4/7/2016 4:48:06 AM 1948 ApplyPatchSuspended for BWAPI 4.1.2 Injector [DEBUG]
+4/7/2016 4:48:27 AM 1948 ApplyPatchSuspended for W-MODE 1.02
+4/7/2016 4:48:27 AM 1948 ResumeThread
+4/7/2016 4:48:27 AM 1948 WaitForInputIdle
+4/7/2016 4:48:27 AM 1948 Call ScWindowCreated for all active Plugins
+4/7/2016 4:48:27 AM 1948 ApplyPatch for BWAPI 4.1.2 Injector [DEBUG]
+4/7/2016 4:48:27 AM 1948 ApplyPatch for W-MODE 1.02
+4/7/2016 4:48:27 AM 1948 Starting Starcraft completed
+4/7/2016 5:05:09 AM 1948 Startbutton
+4/7/2016 5:05:09 AM 1948 Starting Game Starcraft 1.16.1 C:\Program Files (x86)\StarCraft\StarCraft.exe
+4/7/2016 5:05:09 AM 1948 BWAPI 4.1.2 Injector [DEBUG] Version  Compatible
+4/7/2016 5:05:09 AM 1948 W-MODE 1.02 Version 1.0.2 Compatible
+4/7/2016 5:05:09 AM 1948 Obtained DebugPrivilege
+4/7/2016 5:05:09 AM 1948 CreateProcess
+4/7/2016 5:05:09 AM 1948 Call ScSuspended for all active Plugins
+4/7/2016 5:05:09 AM 1948 ApplyPatchSuspended for BWAPI 4.1.2 Injector [DEBUG]
+4/7/2016 5:05:30 AM 1948 ApplyPatchSuspended for W-MODE 1.02
+4/7/2016 5:05:30 AM 1948 ResumeThread
+4/7/2016 5:05:30 AM 1948 WaitForInputIdle
+4/7/2016 5:05:30 AM 1948 Call ScWindowCreated for all active Plugins
+4/7/2016 5:05:30 AM 1948 ApplyPatch for BWAPI 4.1.2 Injector [DEBUG]
+4/7/2016 5:05:30 AM 1948 ApplyPatch for W-MODE 1.02
+4/7/2016 5:05:30 AM 1948 Starting Starcraft completed

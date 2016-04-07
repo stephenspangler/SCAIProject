@@ -13,3 +13,4 @@ extern int getRequiredSupplyDepots(int enqueuedDepots);
 extern int getRequiredSupplyDepots();
 extern resourceProjection getProjectedIncome(int timeframe = 60);
 extern resourceProjection getProjectedExpenditure(int timeframe = 60);
+extern resourceProjection getUnallocatedResources();

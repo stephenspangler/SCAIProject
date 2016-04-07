@@ -7,7 +7,6 @@ using namespace Filter;
 
 void TerranAIModule::onStart()
 {
-
 	// Print the map name.
 	// BWAPI returns std::string when retrieving a string, don't forget to add .c_str() when printing!
 	Broodwar << "The map is " << Broodwar->mapName() << "!" << std::endl;
@@ -47,6 +46,10 @@ void TerranAIModule::onStart()
 			std::string race = (Broodwar->enemy()->getRace().getName() == "Unknown" ? "Random" : Broodwar->enemy()->getRace().getName());
 			Broodwar << "The matchup is " << Broodwar->self()->getRace() << " vs " << race << std::endl;
 		}
+
+		//Add a basic build order
+		addGoal(UnitTypes::Terran_Barracks);
+		addGoal(UnitTypes::Terran_Factory);
 	}
 
 }
@@ -105,11 +108,18 @@ void TerranAIModule::onFrame()
 	}
 
 	requiredSupplyDepots = getRequiredSupplyDepots(enqueuedSupplyDepots);
+	resourceProjection unallocatedResources = getUnallocatedResources();
 
-	//draw the information we gathered to the screen until the next time it is evaluated
+	//draw information to screen until the next time it's evaluated
 	Broodwar->registerEvent([enqueuedSupplyDepots, requiredSupplyDepots](Game*) {
-		Broodwar->drawTextScreen(100, 0, "Supply depots required: %d", requiredSupplyDepots);
-		Broodwar->drawTextScreen(100, 20, "Supply depots enqueued: %d", enqueuedSupplyDepots);
+		int ypos = 20;
+		Broodwar->drawTextScreen(20, 0, "Goals:");
+		for (Goal &g : getGoals()) {
+			Broodwar->drawTextScreen(20, ypos, "%s", g.structureType.getName().c_str());
+			ypos += 20;
+		}
+		
+		
 	},
 		nullptr,    // condition
 		Broodwar->getLatencyFrames());  // frames to run
@@ -117,26 +127,13 @@ void TerranAIModule::onFrame()
 	// iterate through all the units that we own for the sake of issuing orders to them
 	for (auto &u : Broodwar->self()->getUnits())
 	{
-		// ignore the unit if it no longer exists
-		if (!u->exists())
-			continue;
-
-		// Ignore the unit if it is disabled by one of the following status ailments
-		if (u->isLockedDown() || u->isMaelstrommed() || u->isStasised())
-			continue;
-
-		// Ignore the unit if it is unable to act due to being in one of the following states
-		if (u->isLoaded() || !u->isPowered() || u->isStuck())
-			continue;
-
-		// Ignore the unit if it is incomplete or busy constructing
-		if (!u->isCompleted() || u->isConstructing())
+		if (unitIsDisabled(u))
 			continue;
 
 		//if the unit is a worker
 		if (u->getType().isWorker())
 		{
-			evaluateWorkerLogicFor(u, requiredSupplyDepots);
+			evaluateWorkerLogicFor(u, requiredSupplyDepots, workerCount, unallocatedResources);
 		}
 
 		//if the unit is a townhall
@@ -144,6 +141,14 @@ void TerranAIModule::onFrame()
 			evaluateTownhallLogicFor(u, workerCount);
 		}
 
+		//if the unit is a refinery
+		if (u->getType().isRefinery()) {
+			evaluateRefineryLogicFor(u, workerCount);
+		}
+
+		if (u->getType() == UnitTypes::Terran_Barracks) {
+			evaluateBarracksLogicFor(u);
+		}
 	}
 }
 

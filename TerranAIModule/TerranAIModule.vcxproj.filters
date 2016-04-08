@@ -19,6 +19,9 @@
     <ClCompile Include="Source\MilitaryManager.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Shared.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\BuildingPlacer.h">

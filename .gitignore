@@ -13,3 +13,5 @@ Release/*
 *.log
 *.tlog
 *.log
+*.vsp
+*.psess

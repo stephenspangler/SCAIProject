@@ -1,10 +1,11 @@
 #include <iostream>
 
 #include "TerranAIModule.h"
-#include "UnitBehavior.h"
 
 using namespace BWAPI;
 using namespace Filter;
+using namespace UnitBehavior;
+using namespace ResourceLogic;
 
 void TerranAIModule::onStart()
 {
@@ -46,12 +47,15 @@ void TerranAIModule::onStart()
 		}
 
 		//Add a basic build order
-		addGoal(UnitTypes::Terran_Barracks);
-		addGoal(UnitTypes::Terran_Factory);
-		addGoal(UnitTypes::Terran_Academy);
-		addGoal(UnitTypes::Terran_Barracks);
-		addGoal(TechTypes::Stim_Packs);
-		addGoal(TechTypes::Tank_Siege_Mode);
+			addGoal(UnitTypes::Terran_Barracks);
+			addGoal(UnitTypes::Terran_Factory);
+			addGoal(UnitTypes::Terran_Academy);
+			addGoal(UnitTypes::Terran_Barracks);
+			addGoal(TechTypes::Stim_Packs);
+			addGoal(TechTypes::Tank_Siege_Mode);
+
+		//Have our combat units rally around the command center to start
+		
 	}
 }
 
@@ -132,7 +136,7 @@ void TerranAIModule::onFrame()
 	// iterate through all the units that we own for the sake of issuing orders to them
 	for (auto &u : Broodwar->self()->getUnits())
 	{
-		if (unitIsDisabled(u))
+		if (Helpers::unitIsDisabled(u))
 			continue;
 
 		//if the unit is a worker

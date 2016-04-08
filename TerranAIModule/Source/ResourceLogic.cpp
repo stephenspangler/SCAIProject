@@ -3,6 +3,7 @@
 #include "ResourceLogic.h"
 
 using namespace BWAPI;
+using namespace ResourceLogic;
 
 static resourceProjection unallocatedResources;
 
@@ -10,7 +11,7 @@ static resourceProjection unallocatedResources;
 ///in order to avoid being supply blocked.
 ///Note that this function is expensive and should be called as
 ///little as possible.</summary>
-int getRequiredSupplyDepots(int enqueuedDepots) {
+int ResourceLogic::getRequiredSupplyDepots(int enqueuedDepots) {
 	/* Keep count of the most recently provided count of enqueued depots so we don't have to
 	evaluate it every time we want to call this function */
 	static int previousQueuedDepots = 0;
@@ -49,7 +50,7 @@ int getRequiredSupplyDepots(int enqueuedDepots) {
 ///in order to avoid being supply blocked.
 ///Note that this function is expensive and should be called as
 ///little as possible.</summary>
-int getRequiredSupplyDepots() {
+int ResourceLogic::getRequiredSupplyDepots() {
 	return getRequiredSupplyDepots(-1);
 }
 
@@ -57,7 +58,7 @@ int getRequiredSupplyDepots() {
 ///gas income over the specified timeframe.
 ///Note that this function is expensive and should be called as
 ///little as possible.</summary>
-resourceProjection getProjectedIncome(int timeframe) {
+resourceProjection ResourceLogic::getProjectedIncome(int timeframe) {
 	resourceProjection r;
 	r.minerals = 0;
 	r.gas = 0;
@@ -68,7 +69,7 @@ resourceProjection getProjectedIncome(int timeframe) {
 
 ///<summary>Returns a structure containing expected mineral and 
 ///gas expenditures over the specified timeframe.</summary>
-resourceProjection getProjectedExpenditure(int timeframe) {
+resourceProjection ResourceLogic::getProjectedExpenditure(int timeframe) {
 	resourceProjection r;
 	r.minerals = 0;
 	r.gas = 0;
@@ -81,7 +82,7 @@ resourceProjection getProjectedExpenditure(int timeframe) {
 ///that will not be consumed by currently queued structure build orders. 
 ///Note that this function is expensive and should be called at most
 ///once per frame.</summary>
-void calcUnallocatedResources() {
+void ResourceLogic::calcUnallocatedResources() {
 	resourceProjection r;
 	r.minerals = Broodwar->self()->minerals();
 	r.gas = Broodwar->self()->gas();
@@ -103,16 +104,16 @@ void calcUnallocatedResources() {
 
 ///<summary>Gets the last calculated amount of minerals and gas owned by the player 
 ///that will not be consumed by currently queued structure build orders.</summary>
-resourceProjection getUnallocatedResources() {
+resourceProjection ResourceLogic::getUnallocatedResources() {
 	return unallocatedResources;
 }
 
-bool canAfford(BWAPI::UnitType type) {
+bool ResourceLogic::canAfford(BWAPI::UnitType type) {
 	return unallocatedResources.minerals > type.mineralPrice() &&
 		unallocatedResources.gas >= type.gasPrice();
 }
 
-bool canAfford(BWAPI::TechType type) {
+bool ResourceLogic::canAfford(BWAPI::TechType type) {
 	return unallocatedResources.minerals > type.mineralPrice() &&
 		unallocatedResources.gas >= type.gasPrice();
 }

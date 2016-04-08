@@ -8,3 +8,9 @@
 #define WORKERS_REQUIRED_BEFORE_MINING_GAS 12
 //maximum number workers we will attempt to train
 #define MAXIMUM_WORKER_COUNT 21
+
+namespace Helpers {
+
+	extern bool unitIsDisabled(BWAPI::Unit unit);
+
+}

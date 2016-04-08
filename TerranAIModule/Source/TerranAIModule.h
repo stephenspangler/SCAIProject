@@ -1,8 +1,7 @@
 #pragma once
 
 #include "Shared.h"
-
-// Remember not to use "Broodwar" in any global class constructor!
+#include "UnitBehavior.h"
 
 class TerranAIModule : public BWAPI::AIModule
 {

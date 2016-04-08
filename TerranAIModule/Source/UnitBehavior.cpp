@@ -2,10 +2,12 @@
 
 using namespace BWAPI;
 using namespace Filter;
+using namespace UnitBehavior;
 
 bool build(UnitType structure, Unit worker);
 bool train(Unit structure, UnitType type);
 bool research(Unit structure, TechType type);
+bool workerIsAvailable(Unit worker);
 
 Unit scout = nullptr;
 bool exploredAllStartLocs = false;
@@ -23,7 +25,7 @@ static std::list<Goal> goalsUnderConstruction;
 ///be once currently queued structures are completed. If not, pushes new goals in front
 ///of the current goal as needed to satisfy its requirements. If the goal is a tech,
 ///tries to find an appropriate building to research it.</summary>
-void evaluateGoals() {
+void UnitBehavior::evaluateGoals() {
 	if (!goals.empty()) {
 		Goal& g = goals.front();
 		if (g.isResearch) {
@@ -42,7 +44,7 @@ void evaluateGoals() {
 }
 
 ///<summary>Issues the highest priority order that can be found for the target worker.</summary>
-bool evaluateWorkerLogicFor(BWAPI::Unit worker, int requiredSupplyDepots, int workerCount) {
+bool UnitBehavior::evaluateWorkerLogicFor(BWAPI::Unit worker, int requiredSupplyDepots, int workerCount) {
 	/* Priorities, from highest to lowest
 	-Scout if required
 	-Construct a supply depot if needed
@@ -58,12 +60,12 @@ bool evaluateWorkerLogicFor(BWAPI::Unit worker, int requiredSupplyDepots, int wo
 		return false;
 	}
 
-	//if we haven't explored all start locations and our worker count is 10 or more
+	//if we haven't explored all start locations or found our opponent and our worker count is 10 or more
 	if (!exploredAllStartLocs && !foundOpponent && workerCount >= 10) {
 		//if we don't have a scout
 		if (!scout) {
 			//and this worker isn't doing anything crucial
-			if (worker->isIdle() || worker->isGatheringMinerals() || worker->isGatheringGas())
+			if (workerIsAvailable(worker))
 				scout = worker; //congrats, you're our new scout!
 		}
 		else if (scout == worker) { //if we ARE the scout, then move to unexplored start locations
@@ -106,21 +108,12 @@ bool evaluateWorkerLogicFor(BWAPI::Unit worker, int requiredSupplyDepots, int wo
 		} //this unit are the scout
 	} //there is still a reason to scout
 
-	if (worker == scout)
+	if (scout == worker)
 		return true;
 
-	Unitset nearbyEnemies;
-	//first, if we're in danger and not obeying an independent move order, attack the source
-	if (!(worker->getOrder() == Orders::Move)) {
-		if (worker->isAttacking()) { //if we're already attacking, keep going
-			return true;
-		}
-		else if ((nearbyEnemies = worker->getUnitsInRadius(TILE_SIZE * 8, Filter::IsEnemy)).size() > 0) {
-			worker->attack(nearbyEnemies.getPosition());
-		}
+	if (worker->isAttacking()) { //if we're already attacking, keep going
+		return true;
 	}
-
-
 
 	//check whether we should build a supply depot
 	if (requiredSupplyDepots > 0) {
@@ -128,7 +121,7 @@ bool evaluateWorkerLogicFor(BWAPI::Unit worker, int requiredSupplyDepots, int wo
 		if (Broodwar->getFrameCount() > lastFrameOnWhichStructureEnqueued + Broodwar->getLatencyFrames()) {
 
 			//check that the worker is able to build a depot
-			if (worker->isIdle() || worker->isGatheringMinerals() || worker->isGatheringGas()) {
+			if (workerIsAvailable(worker)) {
 
 				//get the unit type of supply depot
 				UnitType supplyProviderType = worker->getType().getRace().getSupplyProvider();
@@ -234,7 +227,7 @@ bool evaluateWorkerLogicFor(BWAPI::Unit worker, int requiredSupplyDepots, int wo
 			//check that the current goal is a structure
 			if (!goal.isResearch) {
 				//check that the worker is able to build a structure
-				if (worker->isIdle() || worker->isGatheringMinerals() || worker->isGatheringGas()) {
+				if (workerIsAvailable(worker)) {
 					//issue the build order
 					if (build(goal.structureType, worker)) {
 						goal.assignee = worker;
@@ -278,7 +271,7 @@ bool evaluateWorkerLogicFor(BWAPI::Unit worker, int requiredSupplyDepots, int wo
 ///<summary>Adds a structure to the goal list so that it will be constructed when
 ///resources are available and all goals added previously have been removed from
 ///the goal list.</summary>
-bool addGoal(BWAPI::UnitType structure, bool front) {
+bool UnitBehavior::addGoal(BWAPI::UnitType structure, bool front) {
 	Goal newGoal;
 	//if it's from a different race or isn't a structure
 	if (structure.getRace() != Broodwar->self()->getRace() || !structure.isBuilding())
@@ -296,7 +289,7 @@ bool addGoal(BWAPI::UnitType structure, bool front) {
 	return true;
 }
 
-bool addGoal(Goal &goal, bool front) {
+bool UnitBehavior::addGoal(Goal &goal, bool front) {
 	if (goal.isResearch) {
 		if (goal.tech.getRace() != Broodwar->self()->getRace())
 			return false; //we can't research it, don't add it as a goal
@@ -320,7 +313,7 @@ bool addGoal(Goal &goal, bool front) {
 ///<summary>Adds a tech to the goal list so that it will be researched when
 ///resources are available and all goals added previously have been removed from
 ///the goal list.</summary>
-bool addGoal(BWAPI::TechType tech, bool front) {
+bool UnitBehavior::addGoal(BWAPI::TechType tech, bool front) {
 	if (tech.getRace() != Broodwar->self()->getRace())
 		return false; //we can't research it, don't add it as a goal
 	Goal newGoal;
@@ -339,7 +332,7 @@ bool addGoal(BWAPI::TechType tech, bool front) {
 #pragma region TownhallLogic
 
 ///<summary>Trains a worker from the target townhall if possible and desirable.</summary>
-bool evaluateTownhallLogicFor(BWAPI::Unit townhall, int workerCount) {
+bool UnitBehavior::evaluateTownhallLogicFor(BWAPI::Unit townhall, int workerCount) {
 	if (!townhall->getType().isResourceDepot()) {
 		Broodwar << "Warning: attempted to evaluate townhall logic for a non-townhall unit";
 		return false;
@@ -347,7 +340,10 @@ bool evaluateTownhallLogicFor(BWAPI::Unit townhall, int workerCount) {
 
 	//check whether we should build a refinery
 	static int gracePeriod = 0;
-	if (Broodwar->getFrameCount() > gracePeriod && workerCount > WORKERS_REQUIRED_BEFORE_MINING_GAS && canAfford(UnitTypes::Terran_Refinery)) {
+	if (Broodwar->getFrameCount() > gracePeriod &&
+		workerCount > WORKERS_REQUIRED_BEFORE_MINING_GAS &&
+		ResourceLogic::canAfford(UnitTypes::Terran_Refinery)) {
+		gracePeriod = Broodwar->getFrameCount() + 120;
 		Unit closestGeyser = townhall->getClosestUnit(Filter::GetType == UnitTypes::Resource_Vespene_Geyser);
 		Unit closestRefinery = townhall->getClosestUnit(Filter::IsRefinery);
 
@@ -357,8 +353,7 @@ bool evaluateTownhallLogicFor(BWAPI::Unit townhall, int workerCount) {
 			if (!closestRefinery || townhall->getDistance(closestRefinery) > townhall->getDistance(closestGeyser)) {
 				//pick a worker and issue the build order
 				for (auto &worker : Broodwar->self()->getUnits()) {
-					if (worker->getType().isWorker() && !unitIsDisabled(worker)) {
-						gracePeriod = Broodwar->getFrameCount() + 120; //give it 5 seconds to start construction before we try again
+					if (worker->getType().isWorker() && !Helpers::unitIsDisabled(worker) && worker->isGatheringMinerals()) {
 						worker->build(UnitTypes::Terran_Refinery, closestGeyser->getTilePosition());
 						break;
 					} //unit is worker and is not disabled
@@ -366,6 +361,21 @@ bool evaluateTownhallLogicFor(BWAPI::Unit townhall, int workerCount) {
 			} //open geyser in proximity
 		} //geyser exists
 	} //should build geyser
+
+	//check if there are nearby threats that need to be attacked by our workers
+	//this call is extremely expensive, so we only run it once every 100 frames
+	static int counter = 0;
+	if (counter >= 100) {
+		counter -= 100;
+		Unitset nearbyGroundEnemies = townhall->getUnitsInRadius(32 * TILE_SIZE, !Filter::IsFlyer && Filter::IsEnemy);
+		if (nearbyGroundEnemies.size() > 0) {
+			for (auto &worker : townhall->getUnitsInRadius(16 * TILE_SIZE, Filter::IsOwned && Filter::IsWorker)) {
+				worker->attack(nearbyGroundEnemies.getPosition());
+			}
+		}
+	}
+	else
+		counter++;
 
 	// if we have fewer than our ideal number of workers, train more
 	if (workerCount < MAXIMUM_WORKER_COUNT && townhall->isIdle())
@@ -391,7 +401,7 @@ bool evaluateTownhallLogicFor(BWAPI::Unit townhall, int workerCount) {
 
 #pragma region RefineryLogic
 
-bool evaluateRefineryLogicFor(BWAPI::Unit refinery, int workerCount) {
+bool UnitBehavior::evaluateRefineryLogicFor(BWAPI::Unit refinery, int workerCount) {
 	if (!refinery->getType().isRefinery()) {
 		Broodwar << "Warning: attempted to evaluate refinery logic for a non-refinery unit";
 		return false;
@@ -419,6 +429,7 @@ bool evaluateRefineryLogicFor(BWAPI::Unit refinery, int workerCount) {
 	if (ref.gracePeriod > Broodwar->getFrameCount())
 		return true;
 
+	ref.gracePeriod = Broodwar->getFrameCount() + 120;
 	//iterate through workers assigned to this refinery
 	std::list<Unit>::iterator i = ref.workers.begin();
 	while (i != ref.workers.end()) {
@@ -443,7 +454,7 @@ bool evaluateRefineryLogicFor(BWAPI::Unit refinery, int workerCount) {
 		//if we have less than three workers mining here
 		if (ref.workers.size() < 3) {
 			//if our worker is idle or harvesting minerals and we have enough workers to justify mining gas
-			if ((worker->isIdle() || worker->isGatheringMinerals()) && workerCount > WORKERS_REQUIRED_BEFORE_MINING_GAS)
+			if (workerIsAvailable(worker) && workerCount > WORKERS_REQUIRED_BEFORE_MINING_GAS)
 			{
 				//order the worker to harvest gas
 				worker->gather(refinery);
@@ -452,10 +463,6 @@ bool evaluateRefineryLogicFor(BWAPI::Unit refinery, int workerCount) {
 			} //worker is able to mine gas and we have enough workers to justify doing so
 		} //workers mining gas less than three
 	} //workers in radius iterator
-
-	/* This grace period serves to give time for workers to adjust their orders and to
-	avoid ordering three workers to the gas simultaneously, which is suboptimal. */
-	ref.gracePeriod = Broodwar->getFrameCount() + 24;
 	return true;
 }
 
@@ -463,7 +470,7 @@ bool evaluateRefineryLogicFor(BWAPI::Unit refinery, int workerCount) {
 
 #pragma region BarracksLogic
 
-bool evaluateBarracksLogicFor(BWAPI::Unit barracks, bool includeFirebats, bool includeMedics) {
+bool UnitBehavior::evaluateBarracksLogicFor(BWAPI::Unit barracks, bool includeFirebats, bool includeMedics) {
 	if (!(barracks->getType() == UnitTypes::Terran_Barracks)) {
 		Broodwar << "Warning: attempted to evaluate barracks logic for a non-barracks unit";
 		return false;
@@ -486,10 +493,10 @@ bool evaluateBarracksLogicFor(BWAPI::Unit barracks, bool includeFirebats, bool i
 			}
 			int gas = Broodwar->self()->gas();
 			//producing medics is higher priority than producing firebats
-			if (medicCount <= (marineCount / 4) && includeMedics && canAfford(UnitTypes::Terran_Medic))
+			if (medicCount <= (marineCount / 4) && includeMedics && ResourceLogic::canAfford(UnitTypes::Terran_Medic))
 				return train(barracks, UnitTypes::Terran_Medic);
 
-			else if (firebatCount <= (marineCount / 4) && includeFirebats && canAfford(UnitTypes::Terran_Firebat))
+			else if (firebatCount <= (marineCount / 4) && includeFirebats && ResourceLogic::canAfford(UnitTypes::Terran_Firebat))
 				return train(barracks, UnitTypes::Terran_Firebat);
 			//can't afford or don't want to build medics or firebats; instead we'll build marines
 			return train(barracks, UnitTypes::Terran_Marine);
@@ -501,7 +508,7 @@ bool evaluateBarracksLogicFor(BWAPI::Unit barracks, bool includeFirebats, bool i
 	return true;
 }
 
-bool evaluateFactoryLogicFor(BWAPI::Unit factory) {
+bool UnitBehavior::evaluateFactoryLogicFor(BWAPI::Unit factory) {
 	if (!(factory->getType() == UnitTypes::Terran_Factory)) {
 		Broodwar << "Warning: attempted to evaluate factory logic for a non-factory unit";
 		return false;
@@ -509,7 +516,7 @@ bool evaluateFactoryLogicFor(BWAPI::Unit factory) {
 
 	if (factory->isIdle()) {
 		//if we don't have an addon, build one - we need it to make tanks
-		if (!factory->getAddon() && canAfford(UnitTypes::Terran_Machine_Shop)) {
+		if (!factory->getAddon() && ResourceLogic::canAfford(UnitTypes::Terran_Machine_Shop)) {
 			return factory->buildAddon(UnitTypes::Terran_Machine_Shop);
 		}
 		else {
@@ -519,7 +526,7 @@ bool evaluateFactoryLogicFor(BWAPI::Unit factory) {
 	return true;
 }
 
-bool evaluateAbilityLogicFor(BWAPI::Unit unit) {
+bool UnitBehavior::evaluateAbilityLogicFor(BWAPI::Unit unit) {
 	/* Units in combat should attempt to use stim - for units that don't
 	have this ability, this call will fail with no side effects */
 	if (unit->isAttacking() && unit->getStimTimer() <= 0)
@@ -554,24 +561,9 @@ bool evaluateAbilityLogicFor(BWAPI::Unit unit) {
 
 #pragma endregion
 
-bool unitIsDisabled(Unit unit) {
 
-	if (!unit->exists() ||
-		unit->isLockedDown() ||
-		unit->isMaelstrommed() ||
-		unit->isStasised() ||
-		unit->isLoaded() ||
-		!unit->isPowered() ||
-		unit->isStuck() ||
-		!unit->isCompleted() ||
-		unit->isConstructing()
-		)
-		return true;
 
-	return false;
-}
-
-std::deque<Goal> getGoals() {
+std::deque<Goal> UnitBehavior::getGoals() {
 	return goals;
 }
 
@@ -581,7 +573,7 @@ bool build(UnitType structure, Unit worker) {
 	//can't build it if it's not a building or if it's from a different race
 	if (!structure.isBuilding() || structure.getRace() != Broodwar->self()->getRace())
 		return false;
-	if (canAfford(structure)) {
+	if (ResourceLogic::canAfford(structure)) {
 		TilePosition targetBuildLocation = placer.getBuildLocationNear(worker->getTilePosition(), structure);
 		if (targetBuildLocation) {
 			if (worker->build(structure, targetBuildLocation)) {
@@ -616,7 +608,7 @@ bool build(UnitType structure, Unit worker) {
 bool train(Unit structure, UnitType type) {
 	if (!structure->getType().isBuilding())
 		return false;
-	if (canAfford(type)) {
+	if (ResourceLogic::canAfford(type)) {
 		if (structure->train(type))
 			return true;
 		else {
@@ -640,9 +632,17 @@ bool train(Unit structure, UnitType type) {
 bool research(Unit structure, TechType type) {
 	if (!structure->getType().isBuilding())
 		return false;
-	if (canAfford(type))
+	if (ResourceLogic::canAfford(type))
 		if (structure->research(type))
 			return true;
 
+	return false;
+}
+
+bool workerIsAvailable(Unit worker) {
+	if (!worker || !worker->exists() || worker->getType() != Broodwar->self()->getRace().getWorker())
+		return false;
+	if (worker->isIdle() || worker->isGatheringMinerals() || worker->isGatheringGas())
+		return true;
 	return false;
 }

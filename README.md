@@ -9,4 +9,8 @@ Copy the contents of the folder named windows (the two .dlls) to your Windows di
 Launch Chaoslauncher.exe from the Chaoslauncher directory. Select BWAPI 4.1.2 Injector [DEBUG] or BWAPI 4.1.2 Injector [RELEASE depending on whether you're launching a debug or release DLL. Hit "Config" and on the 6th line, change:  
 "ai = ..." to "ai = path/to/your/clone/release/TerranAIModule.dll"   
 and  
-"ai_dbg = ..." to "ai_dbg = path/to/your/clone/debug/TerranAIModule.dll".  
+"ai_dbg = ..." to "ai_dbg = path/to/your/clone/debug/TerranAIModule.dll". 
+  
+External library credit:  
+BWAPI - https://github.com/bwapi/bwapi  
+BWTA2 - https://bitbucket.org/auriarte/bwta2  

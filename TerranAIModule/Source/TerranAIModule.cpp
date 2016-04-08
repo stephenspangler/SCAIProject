@@ -47,10 +47,6 @@ void TerranAIModule::onStart()
 		}
 
 		//Add a basic build order
-			addGoal(UnitTypes::Terran_Barracks);
-			addGoal(UnitTypes::Terran_Factory);
-			addGoal(UnitTypes::Terran_Academy);
-			addGoal(UnitTypes::Terran_Barracks);
 			addGoal(TechTypes::Stim_Packs);
 			addGoal(TechTypes::Tank_Siege_Mode);
 
@@ -136,6 +132,8 @@ void TerranAIModule::onFrame()
 	// iterate through all the units that we own for the sake of issuing orders to them
 	for (auto &u : Broodwar->self()->getUnits())
 	{
+		if (!u->exists())
+			continue;
 		if (Helpers::unitIsDisabled(u))
 			continue;
 

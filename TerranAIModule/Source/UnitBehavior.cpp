@@ -29,16 +29,38 @@ void UnitBehavior::evaluateGoals() {
 	if (!goals.empty()) {
 		Goal& g = goals.front();
 		if (g.isResearch) {
+			UnitType req = g.tech.whatResearches();
+			bool foundResearchBuilding = false;
+			bool foundRequirement = false;
 			for (auto &u : Broodwar->self()->getUnits()) {
 				if (u->exists()) {
-					UnitType t = u->getType();
-					UnitType r = g.tech.whatResearches();
+					if (req == u->getType() || u->getBuildType() == req)
+						foundResearchBuilding = true;
+					if (g.tech.requiredUnit() == u->getType() || 
+						u->getBuildType() == g.tech.requiredUnit())
+						foundRequirement = true;
 					if (g.tech.whatResearches() == u->getType() && u->isIdle() && u->isCompleted()) {
 						if (research(u, g.tech))
 							goals.pop_front();
 					}
 				} //if unit exists
 			} //unit iterator
+			//search through goals under construction to see if it's scheduled to be queued
+			for (auto &goal : goalsUnderConstruction) {
+				if (goal.structureType == g.tech.whatResearches())
+					foundResearchBuilding = true;
+				if (goal.structureType == g.tech.requiredUnit())
+					foundRequirement = true;
+			}
+			//if we haven't built and aren't attempting to build the building that researches this tech, 
+			//put it at the front of the goals queue
+			if (!foundResearchBuilding && !g.tech.whatResearches().isAddon()) {
+				addGoal(g.tech.whatResearches(), true);
+			}
+			//likewise - if we're missing a prereq, add it ahead of this goal
+			if (!foundRequirement && !g.tech.requiredUnit().isAddon() && g.tech.requiredUnit() != g.tech.whatResearches()) {
+				addGoal(g.tech.requiredUnit(), true);
+			}
 		} //if is tech
 	} //goal exists
 }
@@ -228,14 +250,39 @@ bool UnitBehavior::evaluateWorkerLogicFor(BWAPI::Unit worker, int requiredSupply
 			if (!goal.isResearch) {
 				//check that the worker is able to build a structure
 				if (workerIsAvailable(worker)) {
+					//check that we meet the prerequisites to build the structure
+					bool techAvailable = true; //assume tech is available
+					for (auto &t : goal.structureType.requiredUnits()) {
+						bool foundTech = false;
+						//tech isn't immediately available
+						if (!Broodwar->self()->hasUnitTypeRequirement(t.first, t.second)) {
+							techAvailable = false;
+							//search through units to see if the tech requirement exists but is under construction
+							for (auto &u : Broodwar->self()->getUnits()) {
+								if (u->exists() && u->getType() == t.first || u->getBuildType() == t.first)
+									foundTech = true;
+							} //unit iterator
+							//also search through goals under construction to see if it's scheduled to be queued
+							for (auto &goal : goalsUnderConstruction) {
+								if (goal.structureType == t.first)
+									foundTech = true;
+							}
+							//if we don't have the tech available and we're not trying to build it
+							if (!techAvailable && !foundTech) {
+								addGoal(t.first, true); //add it to the front of our goals list
+							}
+						} //player has tech requirement
+					} //tech requirement iterator
 					//issue the build order
-					if (build(goal.structureType, worker)) {
-						goal.assignee = worker;
-						goal.gracePeriod = Broodwar->getFrameCount() + 48;
-						goalsUnderConstruction.push_back(goal);
-						goals.pop_front();
-						return true;
-					}
+					if (techAvailable) {
+						if (build(goal.structureType, worker)) {
+							goal.assignee = worker;
+							goal.gracePeriod = Broodwar->getFrameCount() + 48;
+							goalsUnderConstruction.push_back(goal);
+							goals.pop_front();
+							return true;
+						}
+					} //tech available
 				} //if worker capable of building
 			} //if goal is a structure
 		} //if any goals exist
@@ -353,7 +400,7 @@ bool UnitBehavior::evaluateTownhallLogicFor(BWAPI::Unit townhall, int workerCoun
 			if (!closestRefinery || townhall->getDistance(closestRefinery) > townhall->getDistance(closestGeyser)) {
 				//pick a worker and issue the build order
 				for (auto &worker : Broodwar->self()->getUnits()) {
-					if (worker->getType().isWorker() && !Helpers::unitIsDisabled(worker) && worker->isGatheringMinerals()) {
+					if (worker->exists() && worker->getType().isWorker() && !Helpers::unitIsDisabled(worker) && worker->isGatheringMinerals()) {
 						worker->build(UnitTypes::Terran_Refinery, closestGeyser->getTilePosition());
 						break;
 					} //unit is worker and is not disabled
@@ -483,6 +530,8 @@ bool UnitBehavior::evaluateBarracksLogicFor(BWAPI::Unit barracks, bool includeFi
 		int marineCount = 0;
 		if (Broodwar->self()->hasUnitTypeRequirement(UnitTypes::Terran_Academy)) {
 			for (auto &u : Broodwar->self()->getUnits()) {
+				if (!u->exists())
+					continue;
 				if (u->getType() == UnitTypes::Terran_Medic)
 					medicCount++;
 				if (u->getType() == UnitTypes::Terran_Firebat)

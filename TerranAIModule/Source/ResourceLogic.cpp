@@ -22,6 +22,8 @@ int ResourceLogic::getRequiredSupplyDepots(int enqueuedDepots) {
 	int projectedSupplyUsage = Broodwar->self()->supplyUsed() + 2 + (Broodwar->self()->supplyUsed() / 10);
 	for (auto &u : Broodwar->self()->getUnits())
 	{
+		if (!u->exists())
+			continue;
 		//consider all structures that are currently training units
 		if (u->isTraining()) {
 			/* Get the unit at the front of the queue and add its supply cost to the estimate.
@@ -91,6 +93,8 @@ void ResourceLogic::calcUnallocatedResources() {
 	UnitType structure;
 
 	for (auto &u : Broodwar->self()->getUnits()) {
+		if (!u->exists())
+			continue;
 		//if the unit is a worker and on the way to build a structure but has not started construction
 		if (u->getType().isWorker() && u->isConstructing() && !u->getBuildUnit()) {
 			structure = u->getBuildType();

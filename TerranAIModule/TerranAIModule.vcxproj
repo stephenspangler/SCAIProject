@@ -62,7 +62,8 @@
       <SubSystem>Windows</SubSystem>
       <ImportLibrary>$(IntDir)$(TargetName).lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>../lib/BWAPId.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>../lib/BWAPId.lib;../lib/BWTAd.lib;../lib/libboost_thread-vc120-mt-gd-1_56.lib;../lib/libboost_system-vc120-mt-gd-1_56.lib;libCGAL-vc120-mt-gd-4.4.lib;../lib/libgmp-10.lib;../lib/libmpfr-4.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\gitrep\SCAIProject\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -87,10 +88,12 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <ImportLibrary>$(IntDir)$(TargetName).lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>../lib/BWAPI.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>../lib/BWAPI.lib;../lib/BWTA.lib;../lib/libboost_thread-vc120-mt-1_56.lib;../lib/libboost_system-vc120-mt-1_56.lib;../lib/libCGAL-vc120-mt-4.4.lib;../lib/libgmp-10.lib;../lib/libmpfr-4.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\gitrep\SCAIProject\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\MilitaryManager.cpp" />
     <ClCompile Include="Source\BuildingPlacer.cpp" />
     <ClCompile Include="Source\Dll.cpp" />
     <ClCompile Include="Source\ResourceLogic.cpp" />
@@ -98,6 +101,7 @@
     <ClCompile Include="Source\UnitBehavior.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\MilitaryManager.h" />
     <ClInclude Include="Source\BuildingPlacer.h" />
     <ClInclude Include="Source\RectangleArray.h" />
     <ClInclude Include="Source\ResourceLogic.h" />

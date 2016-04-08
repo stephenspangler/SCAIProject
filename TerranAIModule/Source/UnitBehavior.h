@@ -14,21 +14,30 @@ typedef struct Refinery_t {
 } Refinery;
 
 typedef struct Goal_t {
+	//whether the goal is a technology as opposed to a structure
+	bool isResearch;
 	//structure to be built for this goal
 	BWAPI::UnitType structureType;
 	//worker assigned to building the structure
 	BWAPI::Unit assignee;
 	//the physical structure once it starts construction
 	BWAPI::Unit structure;
-	/*time we'll wait after assigning a goal to a worker before we start
-	checking that they're actually carrying out the goal */
+	//research type if applicable
+	BWAPI::TechType tech;
+	/*Time we'll wait after assigning a goal to a worker before we start
+	checking that they're actually carrying out the goal*/
 	int gracePeriod;
 } Goal;
 
-extern bool evaluateWorkerLogicFor(BWAPI::Unit worker, int requiredSupplyDepots, int workerCount, resourceProjection unallocatedResources);
+extern void evaluateGoals();
+extern bool evaluateWorkerLogicFor(BWAPI::Unit worker, int requiredSupplyDepots, int workerCount);
 extern bool evaluateTownhallLogicFor(BWAPI::Unit townhall, int workerCount);
 extern bool evaluateRefineryLogicFor(BWAPI::Unit refinery, int workerCount);
-extern bool evaluateBarracksLogicFor(BWAPI::Unit barracks);
-extern bool addGoal(BWAPI::UnitType structure);
+extern bool evaluateBarracksLogicFor(BWAPI::Unit barracks, bool includeFirebats, bool includeMedics);
+extern bool evaluateFactoryLogicFor(BWAPI::Unit factory);
+bool evaluateAbilityLogicFor(BWAPI::Unit unit);
+extern bool addGoal(BWAPI::UnitType structure, bool front = false);
+extern bool addGoal(Goal &goal, bool front = false);
+extern bool addGoal(BWAPI::TechType tech, bool front = false);
 extern std::deque<Goal> getGoals();
 extern bool unitIsDisabled(BWAPI::Unit unit);

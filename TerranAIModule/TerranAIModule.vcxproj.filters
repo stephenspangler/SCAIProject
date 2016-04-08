@@ -16,6 +16,9 @@
     <ClCompile Include="Source\UnitBehavior.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="Source\MilitaryManager.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\BuildingPlacer.h">
@@ -34,6 +37,9 @@
       <Filter>Header</Filter>
     </ClInclude>
     <ClInclude Include="Source\UnitBehavior.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MilitaryManager.h">
       <Filter>Header</Filter>
     </ClInclude>
   </ItemGroup>

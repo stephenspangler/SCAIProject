@@ -13,4 +13,7 @@ extern int getRequiredSupplyDepots(int enqueuedDepots);
 extern int getRequiredSupplyDepots();
 extern resourceProjection getProjectedIncome(int timeframe = 60);
 extern resourceProjection getProjectedExpenditure(int timeframe = 60);
+extern void calcUnallocatedResources();
 extern resourceProjection getUnallocatedResources();
+extern bool canAfford(BWAPI::UnitType type);
+extern bool canAfford(BWAPI::TechType type);

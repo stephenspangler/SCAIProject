@@ -5,25 +5,46 @@ using namespace Filter;
 
 bool build(UnitType structure, Unit worker);
 bool train(Unit structure, UnitType type);
+bool research(Unit structure, TechType type);
+
+Unit scout = nullptr;
+bool exploredAllStartLocs = false;
+bool foundOpponent = false;
 
 #pragma region WorkerLogic
 
 //used to ensure that we don't have multiple workers trying to queue the same goal or depot
 static int lastFrameOnWhichStructureEnqueued = 0;
 
-/* A goal is a structure other than a supply depot or a refinery which we wish to
-produce when we have the resources available. Goals collectively form a queue from which
-elements are removed as they're fulfilled. */
 static std::deque<Goal> goals;
 static std::list<Goal> goalsUnderConstruction;
 
-/*TODO: if harvesting minerals, and there are more than (mineral field count * 2) workers here, and there is another townhall with less than
-that amount, then transfer this worker to go mine near the other townhall*/
+///<summary>Checks that we're able to build/research the current goal, or that we will 
+///be once currently queued structures are completed. If not, pushes new goals in front
+///of the current goal as needed to satisfy its requirements. If the goal is a tech,
+///tries to find an appropriate building to research it.</summary>
+void evaluateGoals() {
+	if (!goals.empty()) {
+		Goal& g = goals.front();
+		if (g.isResearch) {
+			for (auto &u : Broodwar->self()->getUnits()) {
+				if (u->exists()) {
+					UnitType t = u->getType();
+					UnitType r = g.tech.whatResearches();
+					if (g.tech.whatResearches() == u->getType() && u->isIdle() && u->isCompleted()) {
+						if (research(u, g.tech))
+							goals.pop_front();
+					}
+				} //if unit exists
+			} //unit iterator
+		} //if is tech
+	} //goal exists
+}
 
 ///<summary>Issues the highest priority order that can be found for the target worker.</summary>
-bool evaluateWorkerLogicFor(BWAPI::Unit worker, int requiredSupplyDepots, int workerCount, resourceProjection unallocatedResources) {
+bool evaluateWorkerLogicFor(BWAPI::Unit worker, int requiredSupplyDepots, int workerCount) {
 	/* Priorities, from highest to lowest
-	-Repair damaged structures and units
+	-Scout if required
 	-Construct a supply depot if needed
 	-Construct a building from the goals list
 	-Transfer to another base
@@ -37,6 +58,70 @@ bool evaluateWorkerLogicFor(BWAPI::Unit worker, int requiredSupplyDepots, int wo
 		return false;
 	}
 
+	//if we haven't explored all start locations and our worker count is 10 or more
+	if (!exploredAllStartLocs && !foundOpponent && workerCount >= 10) {
+		//if we don't have a scout
+		if (!scout) {
+			//and this worker isn't doing anything crucial
+			if (worker->isIdle() || worker->isGatheringMinerals() || worker->isGatheringGas())
+				scout = worker; //congrats, you're our new scout!
+		}
+		else if (scout == worker) { //if we ARE the scout, then move to unexplored start locations
+			bool isMovingToUnexploredStartLoc = false;
+			bool unexploredStartLocExists = false;
+			Point<int, 1> unexploredStartLocCoords;
+			for (auto &startLoc : Broodwar->getStartLocations()) {
+				if (!Broodwar->isExplored(startLoc)) {
+					unexploredStartLocExists = true;
+					Point<int, 1> startLocCoords;
+					startLocCoords.x = startLoc.x * TILE_SIZE;
+					startLocCoords.y = startLoc.y * TILE_SIZE;
+					if (worker->getOrderTargetPosition().getDistance(startLocCoords) < 8 * TILE_SIZE)
+						isMovingToUnexploredStartLoc = true;
+					else
+						unexploredStartLocCoords = startLocCoords;
+				}
+			}
+			if (!unexploredStartLocExists) { //no unexplored start location exists
+				exploredAllStartLocs = true;
+				//scout's job is done, send him home
+				scout->move(scout->getClosestUnit(Filter::IsOwned && Filter::IsResourceDepot)->getPosition());
+				scout = nullptr;
+			}
+			else {
+				for (auto &u : Broodwar->getAllUnits()) {
+					if (u->exists())
+						if (u->getPlayer()->isEnemy(Broodwar->self()))
+							if (u->getType().isResourceDepot())
+								foundOpponent = true;
+				}
+				if (foundOpponent) {
+					scout->move(scout->getClosestUnit(Filter::IsOwned && Filter::IsResourceDepot)->getPosition());
+					scout = nullptr;
+				}
+				else
+					if (!isMovingToUnexploredStartLoc)
+						scout->move(unexploredStartLocCoords);
+			} //there is/are unexplored start location(s)
+		} //this unit are the scout
+	} //there is still a reason to scout
+
+	if (worker == scout)
+		return true;
+
+	Unitset nearbyEnemies;
+	//first, if we're in danger and not obeying an independent move order, attack the source
+	if (!(worker->getOrder() == Orders::Move)) {
+		if (worker->isAttacking()) { //if we're already attacking, keep going
+			return true;
+		}
+		else if ((nearbyEnemies = worker->getUnitsInRadius(TILE_SIZE * 8, Filter::IsEnemy)).size() > 0) {
+			worker->attack(nearbyEnemies.getPosition());
+		}
+	}
+
+
+
 	//check whether we should build a supply depot
 	if (requiredSupplyDepots > 0) {
 		//check whether we've already queued a building on this frame
@@ -48,11 +133,9 @@ bool evaluateWorkerLogicFor(BWAPI::Unit worker, int requiredSupplyDepots, int wo
 				//get the unit type of supply depot
 				UnitType supplyProviderType = worker->getType().getRace().getSupplyProvider();
 
-				if (unallocatedResources.minerals >= supplyProviderType.mineralPrice()) {
-					//order the worker to build the supply depot
-					if (build(supplyProviderType, worker))
-						return true;
-				} //if resources are sufficient
+				//order the worker to build the supply depot
+				if (build(supplyProviderType, worker))
+					return true;
 			} //if idle or harvesting
 		} //if haven't queued a building this frame
 	} //if supply depots required
@@ -63,10 +146,13 @@ bool evaluateWorkerLogicFor(BWAPI::Unit worker, int requiredSupplyDepots, int wo
 	std::list<Goal>::iterator i = goalsUnderConstruction.begin();
 	while (i != goalsUnderConstruction.end()) {
 
+
+		Goal &g = *i;
 		//0: do nothing; 1: find an SCV and assign to build; 2: re-add to front of goal queue
 		int resolution = 0;
 
-		Goal &g = *i;
+		if (g.isResearch)
+			continue; //I'm an SCV, not a scientist. Not my problem.
 
 		//first, check whether the building is finished - if so, we can safely remove this goal from the queue.
 		if (g.structure && g.structure->isCompleted()) {
@@ -131,9 +217,7 @@ bool evaluateWorkerLogicFor(BWAPI::Unit worker, int requiredSupplyDepots, int wo
 			continue;
 		}
 		else if (resolution == 2) { //complete failure; re-add goal to goal queue
-			g.assignee = nullptr;
-			g.structure = nullptr;
-			goals.push_front(g);
+			addGoal(g, true);
 			i = goalsUnderConstruction.erase(i);
 			continue;
 		}
@@ -141,14 +225,14 @@ bool evaluateWorkerLogicFor(BWAPI::Unit worker, int requiredSupplyDepots, int wo
 
 	//attempt to build the structure at the front of our goal list
 	//check that we haven't queued a building very recently in order to give time for the other SCV to respond to the order
-	if (Broodwar->getFrameCount() > lastFrameOnWhichStructureEnqueued + Broodwar->getLatencyFrames() + 24) {
+	if (Broodwar->getFrameCount() > lastFrameOnWhichStructureEnqueued + Broodwar->getLatencyFrames() + 100) {
 
 		Goal goal;
 		//check that there's a goal to work with
 		if (!goals.empty()) {
 			goal = goals.front();
-			//check whether we have the resources to build the frontmost member of the list
-			if (unallocatedResources.minerals >= goal.structureType.mineralPrice() && unallocatedResources.gas >= goal.structureType.gasPrice()) {
+			//check that the current goal is a structure
+			if (!goal.isResearch) {
 				//check that the worker is able to build a structure
 				if (worker->isIdle() || worker->isGatheringMinerals() || worker->isGatheringGas()) {
 					//issue the build order
@@ -159,10 +243,10 @@ bool evaluateWorkerLogicFor(BWAPI::Unit worker, int requiredSupplyDepots, int wo
 						goals.pop_front();
 						return true;
 					}
-				}
-			} //if resources available
+				} //if worker capable of building
+			} //if goal is a structure
 		} //if any goals exist
-	} //if haven't queued a building this frame
+	} //if haven't queued a building recently
 
 #pragma endregion
 
@@ -194,7 +278,7 @@ bool evaluateWorkerLogicFor(BWAPI::Unit worker, int requiredSupplyDepots, int wo
 ///<summary>Adds a structure to the goal list so that it will be constructed when
 ///resources are available and all goals added previously have been removed from
 ///the goal list.</summary>
-bool addGoal(BWAPI::UnitType structure) {
+bool addGoal(BWAPI::UnitType structure, bool front) {
 	Goal newGoal;
 	//if it's from a different race or isn't a structure
 	if (structure.getRace() != Broodwar->self()->getRace() || !structure.isBuilding())
@@ -202,45 +286,52 @@ bool addGoal(BWAPI::UnitType structure) {
 	newGoal.structureType = structure;
 	newGoal.structure = nullptr;
 	newGoal.assignee = nullptr;
+	newGoal.tech = TechTypes::None;
+	newGoal.isResearch = false;
 	newGoal.gracePeriod = 0;
-	goals.push_back(newGoal);
+	if (front)
+		goals.push_front(newGoal);
+	else
+		goals.push_back(newGoal);
 	return true;
 }
 
-///<summary>Issues an order to the specified worker to build the specified structure type.</summary>
-bool build(UnitType structure, Unit worker) {
-	static BuildingPlacer placer;
-	//can't build it if it's not a building or if it's from a different race
-	if (!structure.isBuilding() || structure.getRace() != Broodwar->self()->getRace())
-		return false;
-	TilePosition targetBuildLocation = placer.getBuildLocationNear(worker->getTilePosition(), structure);
-	if (targetBuildLocation) {
-		if (worker->build(structure, targetBuildLocation)) {
-			lastFrameOnWhichStructureEnqueued = Broodwar->getFrameCount();
-
-			//register an event that draws the target build location for a few seconds the build order succeeds
-			Broodwar->registerEvent([targetBuildLocation, structure](Game*)
-			{
-				Broodwar->drawBoxMap(Position(targetBuildLocation),
-					Position(targetBuildLocation + structure.tileSize()),
-					Colors::Blue);
-			},
-				nullptr,								//condition
-				100);	//duration in frames
-			return true;
-		}
-		else {
-			//if the order fails, draw a message over the worker with the reason
-			Position pos = worker->getPosition();
-			Error lastErr = Broodwar->getLastError();
-			Broodwar->registerEvent([pos, lastErr](Game*){
-				Broodwar->drawTextMap(pos, "%c%s%s", Text::White, "Failed to build structure: ", lastErr.c_str());
-			},
-				nullptr,						//condition
-				Broodwar->getLatencyFrames());	//duration in frames
-		}
+bool addGoal(Goal &goal, bool front) {
+	if (goal.isResearch) {
+		if (goal.tech.getRace() != Broodwar->self()->getRace())
+			return false; //we can't research it, don't add it as a goal
 	}
-	return false;
+	else {
+		if (goal.structureType.getRace() != Broodwar->self()->getRace() || !goal.structureType.isBuilding())
+			return false; //we can't make it, don't add it as a goal
+	}
+
+	goal.assignee = nullptr;
+	goal.structure = nullptr;
+	goal.gracePeriod = 0;
+
+	if (front)
+		goals.push_front(goal);
+	else
+		goals.push_back(goal);
+	return true;
+}
+
+///<summary>Adds a tech to the goal list so that it will be researched when
+///resources are available and all goals added previously have been removed from
+///the goal list.</summary>
+bool addGoal(BWAPI::TechType tech, bool front) {
+	if (tech.getRace() != Broodwar->self()->getRace())
+		return false; //we can't research it, don't add it as a goal
+	Goal newGoal;
+	newGoal.structureType = UnitTypes::None;
+	newGoal.structure = nullptr;
+	newGoal.assignee = nullptr;
+	newGoal.tech = tech;
+	newGoal.isResearch = true;
+	newGoal.gracePeriod = 0;
+	goals.push_back(newGoal);
+	return true;
 }
 
 #pragma endregion
@@ -256,7 +347,7 @@ bool evaluateTownhallLogicFor(BWAPI::Unit townhall, int workerCount) {
 
 	//check whether we should build a refinery
 	static int gracePeriod = 0;
-	if (Broodwar->getFrameCount() > gracePeriod && workerCount > WORKERS_REQUIRED_BEFORE_MINING_GAS) {
+	if (Broodwar->getFrameCount() > gracePeriod && workerCount > WORKERS_REQUIRED_BEFORE_MINING_GAS && canAfford(UnitTypes::Terran_Refinery)) {
 		Unit closestGeyser = townhall->getClosestUnit(Filter::GetType == UnitTypes::Resource_Vespene_Geyser);
 		Unit closestRefinery = townhall->getClosestUnit(Filter::IsRefinery);
 
@@ -276,20 +367,22 @@ bool evaluateTownhallLogicFor(BWAPI::Unit townhall, int workerCount) {
 		} //geyser exists
 	} //should build geyser
 
-	// if we have fewer than 60 workers, train more
-	if (workerCount < MAXIMUM_WORKER_COUNT && townhall->isIdle() && !townhall->train(townhall->getType().getRace().getWorker()))
+	// if we have fewer than our ideal number of workers, train more
+	if (workerCount < MAXIMUM_WORKER_COUNT && townhall->isIdle())
 	{
-		/* For debugging purposes, if we're unable to train a unit for whatever reason, register an event
-		to draw the error over the townhall until the next evaluation*/
-		Position pos;
-		//draw across the top of the townhall rather than from the center
-		pos.x = townhall->getLeft() - 25;
-		pos.y = townhall->getTop() - 25;
+		if (!townhall->train(townhall->getType().getRace().getWorker())) {
+			/* For debugging purposes, if we're unable to train a unit for whatever reason, register an event
+			to draw the error over the townhall until the next evaluation*/
+			Position pos;
+			//draw across the top of the townhall rather than from the center
+			pos.x = townhall->getLeft() - 25;
+			pos.y = townhall->getTop() - 25;
 
-		Error lastErr = Broodwar->getLastError();
-		Broodwar->registerEvent([pos, lastErr](Game*){ Broodwar->drawTextMap(pos, "%c%s%s", Text::White, "Cannot train: ", lastErr.c_str()); },   // action
-			nullptr,    // condition
-			Broodwar->getLatencyFrames());  // frames to run
+			Error lastErr = Broodwar->getLastError();
+			Broodwar->registerEvent([pos, lastErr](Game*){ Broodwar->drawTextMap(pos, "%c%s%s", Text::White, "Cannot train: ", lastErr.c_str()); },   // action
+				nullptr,    // condition
+				Broodwar->getLatencyFrames());  // frames to run
+		}
 	}
 	return true;
 }
@@ -370,9 +463,92 @@ bool evaluateRefineryLogicFor(BWAPI::Unit refinery, int workerCount) {
 
 #pragma region BarracksLogic
 
-bool evaluateBarracksLogicFor(BWAPI::Unit barracks) {
-	if (barracks->isIdle())
-		return train(barracks, UnitTypes::Terran_Marine);
+bool evaluateBarracksLogicFor(BWAPI::Unit barracks, bool includeFirebats, bool includeMedics) {
+	if (!(barracks->getType() == UnitTypes::Terran_Barracks)) {
+		Broodwar << "Warning: attempted to evaluate barracks logic for a non-barracks unit";
+		return false;
+	}
+
+	if (barracks->isIdle()) {
+		//Get the unit type we should build
+		int medicCount = 0;
+		int firebatCount = 0;
+		int marineCount = 0;
+		if (Broodwar->self()->hasUnitTypeRequirement(UnitTypes::Terran_Academy)) {
+			for (auto &u : Broodwar->self()->getUnits()) {
+				if (u->getType() == UnitTypes::Terran_Medic)
+					medicCount++;
+				if (u->getType() == UnitTypes::Terran_Firebat)
+					firebatCount++;
+				if (u->getType() == UnitTypes::Terran_Marine)
+					marineCount++;
+
+			}
+			int gas = Broodwar->self()->gas();
+			//producing medics is higher priority than producing firebats
+			if (medicCount <= (marineCount / 4) && includeMedics && canAfford(UnitTypes::Terran_Medic))
+				return train(barracks, UnitTypes::Terran_Medic);
+
+			else if (firebatCount <= (marineCount / 4) && includeFirebats && canAfford(UnitTypes::Terran_Firebat))
+				return train(barracks, UnitTypes::Terran_Firebat);
+			//can't afford or don't want to build medics or firebats; instead we'll build marines
+			return train(barracks, UnitTypes::Terran_Marine);
+		}
+		else { //if we can only train marines, then do that
+			return train(barracks, UnitTypes::Terran_Marine);
+		}
+	}
+	return true;
+}
+
+bool evaluateFactoryLogicFor(BWAPI::Unit factory) {
+	if (!(factory->getType() == UnitTypes::Terran_Factory)) {
+		Broodwar << "Warning: attempted to evaluate factory logic for a non-factory unit";
+		return false;
+	}
+
+	if (factory->isIdle()) {
+		//if we don't have an addon, build one - we need it to make tanks
+		if (!factory->getAddon() && canAfford(UnitTypes::Terran_Machine_Shop)) {
+			return factory->buildAddon(UnitTypes::Terran_Machine_Shop);
+		}
+		else {
+			return train(factory, UnitTypes::Terran_Siege_Tank_Tank_Mode);
+		}
+	}
+	return true;
+}
+
+bool evaluateAbilityLogicFor(BWAPI::Unit unit) {
+	/* Units in combat should attempt to use stim - for units that don't
+	have this ability, this call will fail with no side effects */
+	if (unit->isAttacking() && unit->getStimTimer() <= 0)
+		unit->useTech(TechTypes::Stim_Packs);
+
+	if (unit->getType() == UnitTypes::Terran_Siege_Tank_Siege_Mode ||
+		unit->getType() == UnitTypes::Terran_Siege_Tank_Tank_Mode) {
+
+		Unitset nearbyEnemies = unit->getUnitsInRadius(TILE_SIZE * 8, Filter::IsEnemy);
+		int closestEnemyDistance = nearbyEnemies.size() > 0 ? (int)nearbyEnemies.getPosition().getDistance(unit->getPosition()) : 99999;
+		int siegeModeMaxRange = UnitTypes::Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange();
+		int siegeModeMinRange = UnitTypes::Terran_Siege_Tank_Siege_Mode.groundWeapon().minRange();
+
+		if (unit->getType() == UnitTypes::Terran_Siege_Tank_Tank_Mode &&
+			closestEnemyDistance <= siegeModeMaxRange &&
+			closestEnemyDistance > siegeModeMinRange
+			) {
+			//enter siege mode if the enemy is within max range while sieged but outside min range while sieged
+			unit->siege();
+		}
+
+		if (unit->getType() == UnitTypes::Terran_Siege_Tank_Siege_Mode &&
+			(closestEnemyDistance > siegeModeMaxRange ||
+			closestEnemyDistance <= siegeModeMinRange)) {
+			//exit siege mode if there are no enemies within range or the closest enemy is within our minimum range
+			unit->unsiege();
+		}
+	}
+
 	return true;
 }
 
@@ -399,23 +575,74 @@ std::deque<Goal> getGoals() {
 	return goals;
 }
 
+///<summary>Issues an order to the specified worker to build the specified structure type.</summary>
+bool build(UnitType structure, Unit worker) {
+	static BuildingPlacer placer;
+	//can't build it if it's not a building or if it's from a different race
+	if (!structure.isBuilding() || structure.getRace() != Broodwar->self()->getRace())
+		return false;
+	if (canAfford(structure)) {
+		TilePosition targetBuildLocation = placer.getBuildLocationNear(worker->getTilePosition(), structure);
+		if (targetBuildLocation) {
+			if (worker->build(structure, targetBuildLocation)) {
+				lastFrameOnWhichStructureEnqueued = Broodwar->getFrameCount();
+
+				//register an event that draws the target build location for a few seconds
+				Broodwar->registerEvent([targetBuildLocation, structure](Game*)
+				{
+					Broodwar->drawBoxMap(Position(targetBuildLocation),
+						Position(targetBuildLocation + structure.tileSize()),
+						Colors::Blue);
+				},
+					nullptr,								//condition
+					100);	//duration in frames
+				return true;
+			}
+			else {
+				//if the order fails, draw a message over the worker with the reason
+				Position pos = worker->getPosition();
+				Error lastErr = Broodwar->getLastError();
+				Broodwar->registerEvent([pos, lastErr](Game*){
+					Broodwar->drawTextMap(pos, "%c%s%s", Text::White, "Failed to build structure: ", lastErr.c_str());
+				},
+					nullptr,						//condition
+					Broodwar->getLatencyFrames());	//duration in frames
+			}
+		} //placement valid
+	} //can afford
+	return false;
+}
+
 bool train(Unit structure, UnitType type) {
 	if (!structure->getType().isBuilding())
 		return false;
-	if (structure->train(type))
-		return true;
-	else {
-		/* For debugging purposes, if we're unable to train a unit for whatever reason, register an event
-		to draw the error over the townhall until the next evaluation*/
-		Position pos;
-		//draw across the top of the townhall rather than from the center
-		pos.x = structure->getLeft() - 25;
-		pos.y = structure->getTop() - 25;
+	if (canAfford(type)) {
+		if (structure->train(type))
+			return true;
+		else {
+			/* For debugging purposes, if we're unable to train a unit for whatever reason, register an event
+			to draw the error over the townhall until the next evaluation*/
+			Position pos;
+			//draw across the top of the townhall rather than from the center
+			pos.x = structure->getLeft() - 25;
+			pos.y = structure->getTop() - 25;
 
-		Error lastErr = Broodwar->getLastError();
-		Broodwar->registerEvent([pos, lastErr](Game*){ Broodwar->drawTextMap(pos, "%c%s%s", Text::White, "Cannot train: ", lastErr.c_str()); },   // action
-			nullptr,    // condition
-			Broodwar->getLatencyFrames());  // frames to run
-		return false;
+			Error lastErr = Broodwar->getLastError();
+			Broodwar->registerEvent([pos, lastErr](Game*){ Broodwar->drawTextMap(pos, "%c%s%s", Text::White, "Cannot train: ", lastErr.c_str()); },   // action
+				nullptr,    // condition
+				Broodwar->getLatencyFrames());  // frames to run
+			return false;
+		}
 	}
+	return false;
+}
+
+bool research(Unit structure, TechType type) {
+	if (!structure->getType().isBuilding())
+		return false;
+	if (canAfford(type))
+		if (structure->research(type))
+			return true;
+
+	return false;
 }

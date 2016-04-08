@@ -1,6 +1,7 @@
+#include <iostream>
+
 #include "TerranAIModule.h"
 #include "UnitBehavior.h"
-#include <iostream>
 
 using namespace BWAPI;
 using namespace Filter;
@@ -13,9 +14,6 @@ void TerranAIModule::onStart()
 
 	// Enable the UserInput flag, which allows us to control the bot and type messages.
 	Broodwar->enableFlag(Flag::UserInput);
-
-	// Uncomment the following line and the bot will know about everything through the fog of war (cheat).
-	//Broodwar->enableFlag(Flag::CompleteMapInformation);
 
 	// Set the command optimization level so that common commands can be grouped
 	// and reduce the bot's APM (Actions Per Minute).
@@ -50,8 +48,11 @@ void TerranAIModule::onStart()
 		//Add a basic build order
 		addGoal(UnitTypes::Terran_Barracks);
 		addGoal(UnitTypes::Terran_Factory);
+		addGoal(UnitTypes::Terran_Academy);
+		addGoal(UnitTypes::Terran_Barracks);
+		addGoal(TechTypes::Stim_Packs);
+		addGoal(TechTypes::Tank_Siege_Mode);
 	}
-
 }
 
 void TerranAIModule::onEnd(bool isWinner)
@@ -65,7 +66,6 @@ void TerranAIModule::onEnd(bool isWinner)
 
 void TerranAIModule::onFrame()
 {
-	// Called once every game frame
 
 	if (Broodwar->self()->getRace().getName() != "Terran")
 		return; //we don't know how to handle any race other than terran
@@ -84,6 +84,8 @@ void TerranAIModule::onFrame()
 	re-evaluating logic before the result of the previous orders has been processed. */
 	if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0)
 		return;
+
+	evaluateGoals();
 
 	int enqueuedSupplyDepots = 0;
 	int requiredSupplyDepots = 0;
@@ -108,18 +110,21 @@ void TerranAIModule::onFrame()
 	}
 
 	requiredSupplyDepots = getRequiredSupplyDepots(enqueuedSupplyDepots);
+	calcUnallocatedResources();
 	resourceProjection unallocatedResources = getUnallocatedResources();
 
 	//draw information to screen until the next time it's evaluated
-	Broodwar->registerEvent([enqueuedSupplyDepots, requiredSupplyDepots](Game*) {
+	Broodwar->registerEvent([unallocatedResources](Game*) {
 		int ypos = 20;
 		Broodwar->drawTextScreen(20, 0, "Goals:");
 		for (Goal &g : getGoals()) {
-			Broodwar->drawTextScreen(20, ypos, "%s", g.structureType.getName().c_str());
+			Broodwar->drawTextScreen(20, ypos, "%s", g.isResearch ? g.tech.getName().c_str() : g.structureType.getName().c_str());
 			ypos += 20;
 		}
-		
-		
+		ypos += 20;
+		Broodwar->drawTextScreen(20, ypos, "Unallocated minerals: %d", unallocatedResources.minerals);
+		ypos += 20;
+		Broodwar->drawTextScreen(20, ypos, "Unallocated gas: %d", unallocatedResources.gas);
 	},
 		nullptr,    // condition
 		Broodwar->getLatencyFrames());  // frames to run
@@ -133,7 +138,7 @@ void TerranAIModule::onFrame()
 		//if the unit is a worker
 		if (u->getType().isWorker())
 		{
-			evaluateWorkerLogicFor(u, requiredSupplyDepots, workerCount, unallocatedResources);
+			evaluateWorkerLogicFor(u, requiredSupplyDepots, workerCount);
 		}
 
 		//if the unit is a townhall
@@ -147,14 +152,22 @@ void TerranAIModule::onFrame()
 		}
 
 		if (u->getType() == UnitTypes::Terran_Barracks) {
-			evaluateBarracksLogicFor(u);
+			//only build medics and firebats against Zerg - useless against Terran and niche at best against Protoss
+			bool enemyIsZerg = (Broodwar->enemy()->getRace().getName() == "Zerg");
+			evaluateBarracksLogicFor(u, enemyIsZerg, enemyIsZerg);
 		}
+
+		if (u->getType() == UnitTypes::Terran_Factory) {
+			evaluateFactoryLogicFor(u);
+		}
+
+		evaluateAbilityLogicFor(u);
 	}
 }
 
 void TerranAIModule::onSendText(std::string text)
 {
-	//Send the text as is
+	//send the text as is
 	Broodwar->sendText("%s", text.c_str());
 }
 

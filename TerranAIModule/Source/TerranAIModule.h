@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Shared.h"
 
 // Remember not to use "Broodwar" in any global class constructor!

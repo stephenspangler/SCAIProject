@@ -4,6 +4,8 @@
 
 using namespace BWAPI;
 
+static resourceProjection unallocatedResources;
+
 ///<summary>Returns the number of supply depots that should be built immediately
 ///in order to avoid being supply blocked.
 ///Note that this function is expensive and should be called as
@@ -75,25 +77,42 @@ resourceProjection getProjectedExpenditure(int timeframe) {
 	return r;
 }
 
-///<summary>Returns the amount of minerals and gas owned by the player 
+///<summary>Calculates the amount of minerals and gas owned by the player 
 ///that will not be consumed by currently queued structure build orders. 
-///Note that this function is expensive and should be called as
-///little as possible.</summary>
-resourceProjection getUnallocatedResources() {
+///Note that this function is expensive and should be called at most
+///once per frame.</summary>
+void calcUnallocatedResources() {
 	resourceProjection r;
 	r.minerals = Broodwar->self()->minerals();
 	r.gas = Broodwar->self()->gas();
-	r.timeframe = 0; //this metric is an instantaneous count, not a true projection
+	r.timeframe = 0; //this metric is an instantaneous count
 
 	UnitType structure;
 
 	for (auto &u : Broodwar->self()->getUnits()) {
 		//if the unit is a worker and on the way to build a structure but has not started construction
 		if (u->getType().isWorker() && u->isConstructing() && !u->getBuildUnit()) {
+			structure = u->getBuildType();
 			r.minerals -= structure.mineralPrice();
 			r.gas -= structure.gasPrice();
 		}
 	}
 
-	return r;
+	unallocatedResources = r;
+}
+
+///<summary>Gets the last calculated amount of minerals and gas owned by the player 
+///that will not be consumed by currently queued structure build orders.</summary>
+resourceProjection getUnallocatedResources() {
+	return unallocatedResources;
+}
+
+bool canAfford(BWAPI::UnitType type) {
+	return unallocatedResources.minerals > type.mineralPrice() &&
+		unallocatedResources.gas >= type.gasPrice();
+}
+
+bool canAfford(BWAPI::TechType type) {
+	return unallocatedResources.minerals > type.mineralPrice() &&
+		unallocatedResources.gas >= type.gasPrice();
 }

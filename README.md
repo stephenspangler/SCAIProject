@@ -13,4 +13,3 @@ and
   
 External library credit:  
 BWAPI - https://github.com/bwapi/bwapi  
-BWTA2 - https://bitbucket.org/auriarte/bwta2  

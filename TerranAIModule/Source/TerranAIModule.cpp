@@ -6,52 +6,39 @@ using namespace BWAPI;
 using namespace Filter;
 using namespace UnitBehavior;
 using namespace ResourceLogic;
+using namespace MilitaryManager;
 
 void TerranAIModule::onStart()
 {
-	// Print the map name.
-	// BWAPI returns std::string when retrieving a string, don't forget to add .c_str() when printing!
+	//print the map name
 	Broodwar << "The map is " << Broodwar->mapName() << "!" << std::endl;
 
-	// Enable the UserInput flag, which allows us to control the bot and type messages.
+	//enable the UserInput flag, which allows us to control the bot and type messages
 	Broodwar->enableFlag(Flag::UserInput);
 
-	// Set the command optimization level so that common commands can be grouped
-	// and reduce the bot's APM (Actions Per Minute).
 	Broodwar->setCommandOptimizationLevel(2);
 
 	// Check if this is a replay
 	if (Broodwar->isReplay())
 	{
-
-		// Announce the players in the replay
-		Broodwar << "The following players are in this replay:" << std::endl;
-
-		// Iterate all the players in the game using a std:: iterator
-		Playerset players = Broodwar->getPlayers();
-		for (auto p : players)
-		{
-			// Only print the player if they are not an observer
-			if (!p->isObserver())
-				Broodwar << p->getName() << ", playing as " << p->getRace() << std::endl;
-		}
-
+		return;
 	}
 	else // if this is not a replay
 	{
-		// Retrieve you and your enemy's races. enemy() will just return the first enemy.
-		// If you wish to deal with multiple enemies then you must use enemies().
-		if (Broodwar->enemy()) { // First make sure there is an enemy
-			std::string race = (Broodwar->enemy()->getRace().getName() == "Unknown" ? "Random" : Broodwar->enemy()->getRace().getName());
-			Broodwar << "The matchup is " << Broodwar->self()->getRace() << " vs " << race << std::endl;
+		//against any race, we'll get tank production going as fast as possible
+		addGoal(TechTypes::Tank_Siege_Mode);
+		//we'll wait for scouting info before making any further decisions
+
+		//have our combat units rally around the command center to start
+		//find the command center
+		Unit townhall = nullptr;
+		for (auto &u : Broodwar->self()->getUnits()) {
+			if (u->getType().isResourceDepot())
+				townhall = u;
 		}
-
-		//Add a basic build order
-			addGoal(TechTypes::Stim_Packs);
-			addGoal(TechTypes::Tank_Siege_Mode);
-
-		//Have our combat units rally around the command center to start
-		
+		if (townhall)
+			setRallyPoint(townhall->getPosition());
+		setTactic(MilitaryManager::Tactic::DEFEND);
 	}
 }
 
@@ -69,6 +56,8 @@ void TerranAIModule::onFrame()
 
 	if (Broodwar->self()->getRace().getName() != "Terran")
 		return; //we don't know how to handle any race other than terran
+	if (!Broodwar->enemy())
+		return; //we have nothing to do without an enemy
 
 	// Display the game frame rate as text in the upper left area of the screen
 	Broodwar->drawTextScreen(300, 0, "FPS: %d", Broodwar->getFPS());
@@ -86,14 +75,19 @@ void TerranAIModule::onFrame()
 		return;
 
 	evaluateGoals();
+	validateUnits();
+	moveToRally();
+	evaluatePreparedness();
+	executeTactic();
+	evaluateStrategy();
 
 	int enqueuedSupplyDepots = 0;
 	int requiredSupplyDepots = 0;
 	int workerCount = 0;
 
-	// iterate through all the units that we own for the sake of gathering data about them
+	//iterate through all the units that we own for the sake of gathering data about them
 	for (auto &u : Broodwar->self()->getUnits()) {
-		// ignore the unit if it no longer exists
+		//ignore the unit if it no longer exists
 		if (!u->exists())
 			continue;
 
@@ -154,7 +148,8 @@ void TerranAIModule::onFrame()
 		}
 
 		if (u->getType() == UnitTypes::Terran_Barracks) {
-			//only build medics and firebats against Zerg - useless against Terran and niche at best against Protoss
+			//only build medics and firebats against Zerg - useless against Terran
+			//and niche at best against Protoss
 			bool enemyIsZerg = (Broodwar->enemy()->getRace().getName() == "Zerg");
 			evaluateBarracksLogicFor(u, enemyIsZerg, enemyIsZerg);
 		}
@@ -183,23 +178,29 @@ void TerranAIModule::onPlayerLeft(BWAPI::Player player)
 
 void TerranAIModule::onNukeDetect(BWAPI::Position target)
 {
-
-	// Check if the target is a valid position
+	//check if the target is a valid position
 	if (target)
 	{
-		// if so, print the location of the nuclear strike target
+		//print the location of the nuclear strike target
 		Broodwar << "Nuclear Launch Detected at " << target << std::endl;
 	}
-	else
-	{
-	}
-
-	// You can also retrieve all the nuclear missile targets using Broodwar->getNukeDots()!
 }
 
 //Called when the Unit interface object representing the unit that has just become accessible.
 void TerranAIModule::onUnitDiscover(BWAPI::Unit unit)
 {
+	//if we own this unit
+	if (unit->getPlayer() == Broodwar->self()) {
+		//and it's a military unit
+		if (!unit->getType().isWorker() && !unit->getType().isBuilding()) {
+			//add it to our list of military units
+			addToArmy(unit);
+		}
+	}
+
+	//if it's an enemy unit, index it
+	if (unit->getPlayer()->isEnemy(Broodwar->self()))
+		indexEnemyUnit(unit);
 }
 
 //Called when the Unit interface object representing the unit that has just become inaccessible.

@@ -1,12 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="Source\BuildingPlacer.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Dll.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="Source\ResourceLogic.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -19,21 +13,18 @@
     <ClCompile Include="Source\MilitaryManager.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="Source\BuildingPlacer.cpp">
+      <Filter>Source\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Dll.cpp">
+      <Filter>Source\Support</Filter>
+    </ClCompile>
     <ClCompile Include="Source\Shared.cpp">
-      <Filter>Source</Filter>
+      <Filter>Source\Support</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\BuildingPlacer.h">
-      <Filter>Header</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\RectangleArray.h">
-      <Filter>Header</Filter>
-    </ClInclude>
     <ClInclude Include="Source\ResourceLogic.h">
-      <Filter>Header</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Shared.h">
       <Filter>Header</Filter>
     </ClInclude>
     <ClInclude Include="Source\TerranAIModule.h">
@@ -45,6 +36,15 @@
     <ClInclude Include="Source\MilitaryManager.h">
       <Filter>Header</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Shared.h">
+      <Filter>Header\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RectangleArray.h">
+      <Filter>Header\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\BuildingPlacer.h">
+      <Filter>Header\Support</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header">
@@ -52,6 +52,12 @@
     </Filter>
     <Filter Include="Source">
       <UniqueIdentifier>{7c2062e7-7fcf-462f-9f81-852301ae0b58}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Support">
+      <UniqueIdentifier>{d0cdb476-c224-4a42-a73f-1479be1457cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header\Support">
+      <UniqueIdentifier>{06db1b58-d71b-4445-8472-a69ff10c7982}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

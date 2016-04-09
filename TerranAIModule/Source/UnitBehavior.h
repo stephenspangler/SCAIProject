@@ -38,9 +38,9 @@ namespace UnitBehavior {
 	extern bool evaluateBarracksLogicFor(BWAPI::Unit barracks, bool includeFirebats, bool includeMedics);
 	extern bool evaluateFactoryLogicFor(BWAPI::Unit factory);
 	bool evaluateAbilityLogicFor(BWAPI::Unit unit);
-	extern bool addGoal(BWAPI::UnitType structure, bool front = false);
-	extern bool addGoal(Goal &goal, bool front = false);
-	extern bool addGoal(BWAPI::TechType tech, bool front = false);
+	extern bool addGoal(BWAPI::UnitType structure, bool front = false, int count = 1);
+	extern bool addGoal(Goal &goal, bool front = false, int count = 1);
+	extern bool addGoal(BWAPI::TechType tech, bool front = false, int count = 1);
 	extern std::deque<Goal> getGoals();
 
 }

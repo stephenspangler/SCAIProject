@@ -2,6 +2,7 @@
 
 #include "Shared.h"
 #include "UnitBehavior.h"
+#include "MilitaryManager.h"
 
 class TerranAIModule : public BWAPI::AIModule
 {

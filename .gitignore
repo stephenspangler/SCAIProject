@@ -16,3 +16,4 @@ Release/*
 *.vsp
 *.psess
 *.exp
+*.sdf

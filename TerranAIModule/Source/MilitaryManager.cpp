@@ -214,78 +214,61 @@ void MilitaryManager::executeTactic() {
 		if (Broodwar->getFrameCount() < gracePeriod)
 			return;
 
-		bool inCombat = false;
-		for (auto &mu : army) {
-			if (mu.unit->isSieged()) {
-				inCombat = true;
-				gracePeriod = Broodwar->getFrameCount() + 120;
-				break;
-			}
-		}
+
+
 		//select our target from a list of priorities
 		for (auto &u : Broodwar->getAllUnits()) {
 			if (u->exists() && Filter::IsEnemy(u)) {
-				//first priority - visible enemy townhall
-				//second priority - visible enemy building (non-townhall only selected if townhall not selected
-				if (u->getType().isBuilding() && (!target || !target->getType().isResourceDepot()))
-					target = u;
-				//third priority - any visible enemy unit
 				if (!target)
 					target = u;
 			}
 		}
 
-		if (inCombat) {
-			if (target)
-				setRallyPoint(target->getPosition());
-			return;
-		}
-
-			//we have a target and we're not already planning an attack
-			if (target && !planningAttack) {
-				//set our rally point to the average of our units' positions and wait a while for our units to gather up
-				Unitset a;
-				for (auto &mu : army) {
-					a.insert(mu.unit);
-				}
-				setRallyPoint(a.getPosition());
-				enemyLocation = target->getPosition();
-				gracePeriod = Broodwar->getFrameCount() + (24 * 20);
-				obeyRallyPoint = true;
-				planningAttack = true;
-				attackingBase = target->getType().isBuilding();
-				Broodwar << "Preparing attack against enemy " << (attackingBase ? "base." : "unit.") << std::endl;
-			}
-			else if (planningAttack) { //we're planning an attack and the grace period has expired
-				//let slip the dogs of war
-				setRallyPoint(enemyLocation);
-				for (auto &mu : army) {
-					mu.unit->attack(enemyLocation);
-				}
-				//let them go for a while before we reevaluate
-				gracePeriod = Broodwar->getFrameCount() + (attackingBase ? (24 * 60) : (24 * 20));
-				planningAttack = false;
-				obeyRallyPoint = true;
-				Broodwar << "Launching attack." << std::endl;
-			}
-			else { //fourth priority (no target) - spread army out at random searching for the enemy
-				for (auto &mu : army) {
-					if (mu.unit->isIdle())
-						mu.unit->attack(Helpers::getRandomPosition());
-				}
-				obeyRallyPoint = false;
-			}
+		//we have a target and we're not already planning an attack
+		if (target && !planningAttack) {
+			//set our rally point to the average of our units' positions and wait a while for our units to gather up
+			Unitset a;
 			for (auto &mu : army) {
-				if (mu.loader) {
-					if (mu.loader->getType() == UnitTypes::Terran_Bunker) {
-						if (mu.unit->isLoaded()) {
-							mu.loader->unload(mu.unit);
-						} //is loaded
-						mu.loader = nullptr;
-						mu.reserved = false;
-					} //loader is a bunker
-				} //has a loader
-			} //military unit iterator
+				a.insert(mu.unit);
+			}
+			setRallyPoint(a.getPosition());
+			enemyLocation = target->getPosition();
+			gracePeriod = Broodwar->getFrameCount() + (24 * 20);
+			obeyRallyPoint = true;
+			planningAttack = true;
+			attackingBase = target->getType().isBuilding();
+			Broodwar << "Preparing attack against enemy " << (attackingBase ? "base." : "unit.") << std::endl;
+		}
+		else if (planningAttack) { //we're planning an attack and the grace period has expired
+			//let slip the dogs of war
+			setRallyPoint(enemyLocation);
+			for (auto &mu : army) {
+				mu.unit->attack(enemyLocation);
+			}
+			//let them go for a while before we reevaluate
+			gracePeriod = Broodwar->getFrameCount() + (attackingBase ? (24 * 60) : (24 * 20));
+			planningAttack = false;
+			obeyRallyPoint = true;
+			Broodwar << "Launching attack." << std::endl;
+		}
+		else { //fourth priority (no target) - spread army out at random searching for the enemy
+			for (auto &mu : army) {
+				if (mu.unit->isIdle())
+					mu.unit->attack(Helpers::getRandomPosition());
+			}
+			obeyRallyPoint = false;
+		}
+		for (auto &mu : army) {
+			if (mu.loader) {
+				if (mu.loader->getType() == UnitTypes::Terran_Bunker) {
+					if (mu.unit->isLoaded()) {
+						mu.loader->unload(mu.unit);
+					} //is loaded
+					mu.loader = nullptr;
+					mu.reserved = false;
+				} //loader is a bunker
+			} //has a loader
+		} //military unit iterator
 	} //tactic is attack
 }
 

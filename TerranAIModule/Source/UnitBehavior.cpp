@@ -699,7 +699,7 @@ bool UnitBehavior::evaluateFactoryLogicFor(BWAPI::Unit factory) {
 	static int gracePeriod = 0;
 	if (Broodwar->getFrameCount() < gracePeriod)
 		return true;
-	gracePeriod = Broodwar->getFrameCount() + 24;
+	gracePeriod = Broodwar->getFrameCount() + Broodwar->getLatencyFrames() + 24;
 
 	if (factory->isIdle()) {
 		//if we have an addon, only ever train tanks, even if we could afford another unit type
@@ -743,6 +743,15 @@ bool UnitBehavior::evaluateAbilityLogicFor(BWAPI::Unit unit) {
 			//exit siege mode if there are no enemies within range or the closest enemy is within our minimum range
 			unit->unsiege();
 		}
+	}
+
+	if (unit->getType() == UnitTypes::Terran_Comsat_Station) {
+		for (auto &u : Broodwar->enemy()->getUnits()) {
+			if (u->isCloaked()) {
+				//comsat station scan this thing here if you haven't scanned in the last 15 seconds or so
+			}
+		}
+		
 	}
 
 	return true;

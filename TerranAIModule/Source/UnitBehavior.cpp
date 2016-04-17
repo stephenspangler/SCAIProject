@@ -193,7 +193,7 @@ namespace UnitBehavior {
 						//if we're capable of building the addon
 						if (u->getType() == g.structureType.whatBuilds().first) {
 							//if we're idle or only just began training a unit
-							if (u->isIdle() || (u->isTraining() && u->getRemainingTrainTime() > (u->getTrainingQueue()[0].buildTime() * 0.9))) {
+							if (u->isIdle() || (u->isTraining() && u->getRemainingTrainTime() > (u->getTrainingQueue()[0].buildTime() * 0.9))) { //Causing deque crash
 								//if we don't have an addon
 								if (!u->getAddon() && canAfford(g.structureType)) {
 									if (u->isTraining())

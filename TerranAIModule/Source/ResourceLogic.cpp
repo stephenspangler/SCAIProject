@@ -30,8 +30,10 @@ namespace ResourceLogic {
 				/* Get the unit at the front of the queue and add its supply cost to the estimate.
 				We do this because it's reasonable to expect that if we're training a unit now, we
 				will train another unit of the same type once that unit is complete. */
-				projectedSupplyUsage += (u->getTrainingQueue()[0]).supplyRequired();
-
+				if (!u->getTrainingQueue().empty()){
+					projectedSupplyUsage += (u->getTrainingQueue()[0]).supplyRequired();
+				}
+				
 			}
 		}
 

@@ -63,6 +63,25 @@ namespace MilitaryManager {
 		} //MilitaryUnit iterator
 	}
 
+	bool getUnitsGathered() {
+		double muPercent = 0.0;
+		for (auto &mu : army) {
+			//if the unit is within 10 tiles of the rallyPoint, add 1 to muPercent
+			if (mu.unit->getPosition().getDistance(rallyPoint) <= 10 * TILE_SIZE){ 
+				muPercent++;
+			}
+		}
+		//if the value stored in muPercent is >= 80% of the army size, 
+		//then at least 80% of the army has gathered at the rally point
+		if (muPercent >= army.size() * 0.8){ 
+			Broodwar << "This many have gathered " << muPercent << " out of " << army.size() << std::endl; //for debugging purposes
+			return true;
+		}
+		else{
+			return false;  //80% of the units have not gathered, so return false and somehow run this method again
+		}
+	}
+
 	int countEnemyUnitsOfType(UnitType type) {
 		int count = 0;
 		for (auto *u : enemyUnits) {
@@ -207,19 +226,20 @@ namespace MilitaryManager {
 
 		else if (tactic == Tactic::ATTACK) {
 			Unit target = nullptr;
-			static int gracePeriod = 0;
+			static int gracePeriod = 0; 
 			static Position enemyLocation;
 			static bool planningAttack = false;
 			static bool attackingBase = false;
+			static bool unitsGathered = false;
 
-			if (Broodwar->getFrameCount() < gracePeriod)
+			if (Broodwar->getFrameCount() < gracePeriod) 
 				return;
 
 			bool inCombat = false;
 			for (auto &mu : army) {
 				if (mu.unit->isSieged()) {
 					inCombat = true;
-					gracePeriod = Broodwar->getFrameCount() + 120;
+					gracePeriod = Broodwar->getFrameCount() + 120; 
 					break;
 				}
 			}
@@ -251,20 +271,22 @@ namespace MilitaryManager {
 				}
 				setRallyPoint(a.getPosition());
 				enemyLocation = target->getPosition();
-				gracePeriod = Broodwar->getFrameCount() + (24 * 20);
+				//gracePeriod = Broodwar->getFrameCount() + (24 * 20); 
+
 				obeyRallyPoint = true;
+				unitsGathered = getUnitsGathered();
 				planningAttack = true;
 				attackingBase = target->getType().isBuilding();
 				Broodwar << "Preparing attack against enemy " << (attackingBase ? "base." : "unit.") << std::endl;
 			}
-			else if (planningAttack) { //we're planning an attack and the grace period has expired
+			else if (planningAttack && unitsGathered) { //we're planning an attack and the grace period has expired
 				//let slip the dogs of war
 				setRallyPoint(enemyLocation);
 				for (auto &mu : army) {
 					mu.unit->attack(enemyLocation);
 				}
 				//let them go for a while before we reevaluate
-				gracePeriod = Broodwar->getFrameCount() + (attackingBase ? (24 * 60) : (24 * 20));
+				gracePeriod = Broodwar->getFrameCount() + (attackingBase ? (24 * 60) : (24 * 20)); //THIS LINE TO CHANGE TOO?
 				planningAttack = false;
 				obeyRallyPoint = true;
 				Broodwar << "Launching attack." << std::endl;

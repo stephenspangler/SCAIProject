@@ -193,14 +193,17 @@ namespace UnitBehavior {
 						//if we're capable of building the addon
 						if (u->getType() == g.structureType.whatBuilds().first) {
 							//if we're idle or only just began training a unit
-							if (u->isIdle() || (u->isTraining() && u->getRemainingTrainTime() > (u->getTrainingQueue()[0].buildTime() * 0.9))) { //Causing deque crash
+							if (u->isIdle() || (
+								u->isTraining() &&
+								!u->getTrainingQueue().empty() &&
+								u->getRemainingTrainTime() > (u->getTrainingQueue()[0].buildTime() * 0.9))) {
 								//if we don't have an addon
 								if (!u->getAddon() && canAfford(g.structureType)) {
 									if (u->isTraining())
 										u->cancelTrain();
 									if (u->buildAddon(g.structureType)) {
 										g.assignee = u;
-										g.gracePeriod = Broodwar->getFrameCount() + 48;
+										g.gracePeriod = Broodwar->getFrameCount() + Broodwar->getLatencyFrames() + 48;
 										goalsUnderConstruction.push_back(g);
 										goals.pop_front();
 									}
@@ -711,7 +714,7 @@ namespace UnitBehavior {
 		if (unit->getType() == UnitTypes::Terran_Siege_Tank_Siege_Mode ||
 			unit->getType() == UnitTypes::Terran_Siege_Tank_Tank_Mode) {
 
-			Unitset nearbyEnemies = unit->getUnitsInRadius(TILE_SIZE * 8, Filter::IsEnemy);
+			Unitset nearbyEnemies = unit->getUnitsInRadius(TILE_SIZE * 8, Filter::IsEnemy && !Filter::IsFlyer);
 			int closestEnemyDistance = nearbyEnemies.size() > 0 ? (int)nearbyEnemies.getPosition().getDistance(unit->getPosition()) : 99999;
 			int siegeModeMaxRange = UnitTypes::Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange();
 			int siegeModeMinRange = UnitTypes::Terran_Siege_Tank_Siege_Mode.groundWeapon().minRange();
@@ -732,14 +735,17 @@ namespace UnitBehavior {
 			}
 		}
 
-		if (unit->getType() == UnitTypes::Terran_Comsat_Station) {
-			for (auto &u : Broodwar->enemy()->getUnits()) {
-				if (u->isCloaked()) {
-					//comsat station scan this thing here if you haven't scanned in the last 15 seconds or so
-				}
-			}
-
-		}
+		static int scanGracePeriod = 0;
+		if (Broodwar->getFrameCount() > scanGracePeriod) {
+			if (unit->getType() == UnitTypes::Terran_Comsat_Station) {
+				for (auto &u : Broodwar->enemy()->getUnits()) {
+					if ((u->isCloaked() || u->isBurrowed()) && !u->isDetected()) {
+						unit->useTech(TechTypes::Scanner_Sweep, u->getPosition());
+						scanGracePeriod = Broodwar->getFrameCount() + 120;
+					} //undetected cloaked unit
+				} //enemy unit iterator
+			} //unit is comsat station
+		} //grace period elapsed
 
 		return true;
 	}

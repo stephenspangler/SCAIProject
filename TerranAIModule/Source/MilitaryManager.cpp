@@ -11,6 +11,7 @@ namespace MilitaryManager {
 	static std::vector<Unit> enemyUnits;
 	static Tactic tactic;
 	static Position enemyBase;
+	static bool attacking = false;
 
 	void addToArmy(Unit militaryUnit) {
 		MilitaryUnit newUnit;
@@ -71,14 +72,14 @@ namespace MilitaryManager {
 				muPercent++;
 			}
 		}
-		//if the value stored in muPercent is >= 80% of the army size, 
-		//then at least 80% of the army has gathered at the rally point
-		if (muPercent >= army.size() * 0.8){
-			Broodwar << "This many have gathered " << muPercent << " out of " << army.size() << std::endl; //for debugging purposes
+		//if the value stored in muPercent is >= 75% of the army size, 
+		//then at least 75% of the army has gathered at the rally point
+		if (muPercent >= army.size() * 0.75){
+			Broodwar << "Gathered " << muPercent << " of " << army.size() << " units" <<std::endl; //for debugging purposes
 			return true;
 		}
 		else{
-			return false;  //80% of the units have not gathered, so return false and somehow run this method again
+			return false;
 		}
 	}
 
@@ -97,9 +98,9 @@ namespace MilitaryManager {
 		if (enemyRace == Races::Unknown || !firstRunAfterEnemyRaceDiscovered)
 			return;
 		firstRunAfterEnemyRaceDiscovered = false;
-		char terranstr[] = "some grimy humans.";
-		char protossstr[] = "those religious sycophants.";
-		char zergstr[] = "the swarm.";
+		char terranstr[] = "other Terrans.";
+		char protossstr[] = "the Protoss.";
+		char zergstr[] = "the Swarm.";
 		char *str =
 			enemyRace == Races::Terran ? terranstr :
 			enemyRace == Races::Protoss ? protossstr :
@@ -110,6 +111,8 @@ namespace MilitaryManager {
 			//against zerg, add an extra barracks and get stim for a quick bust
 			UnitBehavior::addGoal(UnitTypes::Terran_Barracks);
 			UnitBehavior::addGoal(TechTypes::Stim_Packs);
+			//and a comsat station so we can deal with lurkers
+			UnitBehavior::addGoal(UnitTypes::Terran_Comsat_Station);
 		}
 
 		if (enemyRace == Races::Protoss || enemyRace == Races::Terran) {
@@ -118,13 +121,11 @@ namespace MilitaryManager {
 		}
 
 		if (enemyRace == Races::Protoss) {
-			UnitBehavior::addGoal(UnitTypes::Terran_Armory);
+			UnitBehavior::addGoal(UnitTypes::Terran_Comsat_Station);
 		}
-
 		//add an extra barracks to the end of each build to help us make use of excess mineral income
 		UnitBehavior::addGoal(UnitTypes::Terran_Barracks);
-		//add a comsat after that
-		UnitBehavior::addGoal(UnitTypes::Terran_Comsat_Station);
+		
 	}
 
 	void evaluateScoutingInfo(Position enemyBaseLoc) {
@@ -140,6 +141,11 @@ namespace MilitaryManager {
 		{
 			//if we're getting rushed, build a couple of bunkers ASAP
 			UnitBehavior::addGoal(UnitTypes::Terran_Bunker, true, 2);
+		}
+
+		if (enemyRace == Races::Protoss && countEnemyUnitsOfType(UnitTypes::Protoss_Citadel_of_Adun) > 0) {
+			//decent chance we're getting DT rushed; spam detection
+			UnitBehavior::addGoal(UnitTypes::Terran_Missile_Turret, true, 2);
 		}
 	}
 
@@ -227,73 +233,56 @@ namespace MilitaryManager {
 		else if (tactic == Tactic::ATTACK) {
 			Unit target = nullptr;
 			static int gracePeriod = 0;
+			static int gatheringPeriod = 0;
 			static Position enemyLocation;
 			static bool planningAttack = false;
-			static bool attackingBase = false;
-			static bool unitsGathered = false;
+
 
 			if (Broodwar->getFrameCount() < gracePeriod)
 				return;
 
-			bool inCombat = false;
-			for (auto &mu : army) {
-				if (mu.unit->isSieged()) {
-					inCombat = true;
-					gracePeriod = Broodwar->getFrameCount() + 120;
-					break;
-				}
-			}
-			//select our target from a list of priorities
+			//select a target
 			for (auto &u : Broodwar->getAllUnits()) {
-				if (u->exists() && Filter::IsEnemy(u)) {
-					//first priority - visible enemy townhall
-					//second priority - visible enemy building (non-townhall only selected if townhall not selected
-					if (u->getType().isBuilding() && (!target || !target->getType().isResourceDepot()))
-						target = u;
-					//third priority - any visible enemy unit
-					if (!target)
-						target = u;
-				}
+				if (!target && u->getPlayer()->isEnemy(Broodwar->self()))
+					target = u;
 			}
 
-			if (inCombat) {
-				if (target)
-					setRallyPoint(target->getPosition());
+			if (attacking && target) { //if we're attacking and we can see an enemy unit, go kill it
+				setRallyPoint(target->getPosition());
 				return;
 			}
 
+			attacking = false; //we have no target - give up the attack
+
 			//we have a target and we're not already planning an attack
 			if (target && !planningAttack) {
-				//set our rally point to the average of our units' positions and wait a while for our units to gather up
+				//set our rally point to the midpoint of the average of our units' positions and the target's position and wait til our units gather
 				Unitset a;
 				for (auto &mu : army) {
 					a.insert(mu.unit);
 				}
-				setRallyPoint(a.getPosition());
 				enemyLocation = target->getPosition();
-				//gracePeriod = Broodwar->getFrameCount() + (24 * 20); 
+				setRallyPoint((a.getPosition() + enemyLocation) / 2);
+				gatheringPeriod = Broodwar->getFrameCount() + (24 * 60); //timeout so we don't get stuck gathering forever
 
 				obeyRallyPoint = true;
-				unitsGathered = getUnitsGathered();
 				planningAttack = true;
-				attackingBase = target->getType().isBuilding();
-				Broodwar << "Preparing attack against enemy " << (attackingBase ? "base." : "unit.") << std::endl;
+				Broodwar << "Preparing attack against enemy " << (target->getType().isBuilding() ? "base." : "unit.") << std::endl;
 			}
-			else if (planningAttack && unitsGathered) { //we're planning an attack and the grace period has expired
+			else if (planningAttack && (getUnitsGathered() || Broodwar->getFrameCount() > gatheringPeriod)) { //we're planning an attack and our units are ready, or the gathering period has expired
 				//let slip the dogs of war
 				setRallyPoint(enemyLocation);
 				for (auto &mu : army) {
 					mu.unit->attack(enemyLocation);
 				}
 				//let them go for a while before we reevaluate
-				gracePeriod = Broodwar->getFrameCount() + (attackingBase ? (24 * 60) : (24 * 20)); //THIS LINE TO CHANGE TOO?
+				gracePeriod = Broodwar->getFrameCount() + (24 * 10);
 				planningAttack = false;
 				obeyRallyPoint = true;
 				Broodwar << "Launching attack." << std::endl;
-
+				attacking = true;
 			}
-
-			else { //fourth priority (no target) - spread army out at random searching for the enemy
+			else if (!planningAttack) { //we have no target and we're not planning an attack - spread out and search for the enemy
 				for (auto &mu : army) {
 					if (mu.unit->isIdle())
 						mu.unit->attack(Helpers::getRandomPosition());
@@ -319,11 +308,9 @@ namespace MilitaryManager {
 		if (!Broodwar->enemy())
 			return;
 		Race enemyRace = Broodwar->enemy()->getRace();
-		if ((enemyRace == Races::Zerg &&
-			Broodwar->self()->hasResearched(TechTypes::Stim_Packs))
-			||
-			((enemyRace == Races::Terran || enemyRace == Races::Protoss) &&
-			Helpers::getOwnedUnitCountOfType(UnitTypes::Terran_Siege_Tank_Tank_Mode) > 4))
+		//if we have 4+ siege tanks
+		if (Helpers::getOwnedUnitCountOfType(UnitTypes::Terran_Siege_Tank_Tank_Mode) >= 4 ||
+			attacking) //or we're currently attacking
 		{
 			setTactic(Tactic::ATTACK);
 			return;

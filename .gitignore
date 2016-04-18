@@ -20,4 +20,4 @@ Release/*
 *.sdf
 *.sdf
 Chaoslauncher/__log.txt
-Chaoslauncher/__log.txt
+*.pdb
